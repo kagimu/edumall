@@ -24,11 +24,11 @@
     <!-- Custom login page styles -->
     <style>
         body {
-            background: url('https://i.imghippo.com/files/WwB1445I.jpg') center center/cover no-repeat;
-            background-blur: 10px;
+            background: url('https://i.imghippo.com/files/QaUM5275qQ.jpg') center center/cover no-repeat;
+            background-blur: 1px;
             background-size: cover;
             background-attachment: fixed;
-            color: white;
+            color: blue;
         }
         .page {
             display: flex;
@@ -46,8 +46,8 @@
             max-width: 450px;
         }
         .login-logo img {
-            max-width: 200px;
-            margin-bottom: 20px;
+            max-width: 280px;
+            margin-bottom: 0px;
         }
         .card-header {
             text-align: center;
@@ -57,8 +57,12 @@
             padding: 30px;
         }
         .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
+            background-color: #0c4572;
+            border-color: #0c4572;
+            border-radius: 30px;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
         }
         .btn-primary:hover {
             background-color: #0056b3;
@@ -86,6 +90,7 @@
             text-align: center;
             color: #000;
             margin-bottom: 50px;
+            margin-top: -50px;
         }
     </style>
 </head>
@@ -95,7 +100,7 @@
     <div class="login-card">
         <div class="text-center login-logo">
             <!-- Add your logo here -->
-            <img src="https://i.imghippo.com/files/dstf2415FDA.png" alt="Logo">
+            <img src="https://i.imghippo.com/files/ynwR3604kw.png" alt="Logo">
 
             <h3 class="text-center">Welcome</h3>
         </div>
@@ -135,13 +140,14 @@
             </div>
 
             <!-- Submit button -->
-            <div class="row">
-                <div class="col-12">
-                    <button type="submit" class="btn btn-lg btn-primary btn-block">
-                    Sign In  <i class="fe fe-arrow-right"></i>
+            <div class="row justify-content-center">
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-lg btn-primary btn-block px-20 py-2">
+                        Sign In <i class="fe fe-arrow-right"></i>
                     </button>
                 </div>
             </div>
+            
         </form>
     </div>
 </div>

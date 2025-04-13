@@ -10,8 +10,12 @@ use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\ComputerLabController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Support\Facades\Auth;
 
-Route::get('/', function () {
+Auth::routes();
+
+
+Route::get('/dashboard', function () {
     return redirect()->route('login');
 });
 
@@ -77,3 +81,7 @@ Route::middleware('auth')->group(function () {
 
 
 });
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

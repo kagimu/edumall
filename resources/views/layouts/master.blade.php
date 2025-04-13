@@ -11,7 +11,7 @@
     <meta name="keywords" content="land, ville, lan, landville, propatiz, linked" />
 
     <!-- Title -->
-    <title>LandVille | {{session('title')}}</title>
+    <title>EDUMALL | {{session('title')}}</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,7 +19,7 @@
   <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
     <!--Favicon -->
-    <link rel="icon" href="https://i.imghippo.com/files/pOnh7024o.png" type="image/x-icon" />
+    <link rel="icon" href="https://i.imghippo.com/files/R3552HkQ.png" type="image/x-icon" />
 
     <!-- Bootstrap css -->
     <link href="../../assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet" />
@@ -83,7 +83,7 @@
                         {{--<h3 style="color: #5eb95d; margin-top: 10px;">{{config('app.name')}}</h3>--}}
                         <h4
                             style="color: white; margin-top: 10px; background: #00138f; padding-top: 12px; padding-bottom:12px; border-radius: 6px">
-                            LANDVILLE</h4>
+                            EDUMALL</h4>
 
                     </a>
                 </div>
@@ -103,7 +103,7 @@
 
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('services.index')}}">
+                        <a class="side-menu__item" href="{{route('index.labs')}}">
                             <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -112,10 +112,10 @@
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                             </svg>
-                            <span class="side-menu__label">LandVille Services</span></a>
+                            <span class="side-menu__label">Laboratory</span></a>
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('blogs.index')}}">
+                        <a class="side-menu__item" href="{{route('index.events')}}">
                             <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -123,10 +123,10 @@
                                 <polyline points="2 17 12 22 22 17"></polyline>
                                 <polyline points="2 12 12 17 22 12"></polyline>
                             </svg>
-                            <span class="side-menu__label">Blogs</span></a>
+                            <span class="side-menu__label">Events</span></a>
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('mainTitles.index')}}">
+                        <a class="side-menu__item" href="{{route('index.computerLabs')}}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" class="side-menu__icon">
@@ -135,19 +135,19 @@
                                 <rect x="14" y="14" width="7" height="7"></rect>
                                 <rect x="3" y="14" width="7" height="7"></rect>
                             </svg>
-                            <span class="side-menu__label">Titles</span></a>
+                            <span class="side-menu__label">Computer Lab</span></a>
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('collages.index')}}">
+                        <a class="side-menu__item" href="{{route('index.furniture')}}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" class="side-menu__icon">
                                 <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                             </svg>
-                            <span class="side-menu__label">About Collage</span></a>
+                            <span class="side-menu__label">Furniture</span></a>
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('bg_videos.index')}}">
+                        <a class="side-menu__item" href="{{route('index.holidays')}}">
                             <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -157,10 +157,10 @@
                                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
                             </svg>
-                            <span class="side-menu__label">Background Video</span></a>
+                            <span class="side-menu__label">Holidays</span></a>
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('property_images.index')}}">
+                        <a class="side-menu__item" href="{{route('index.sports')}}">
                             <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -170,11 +170,11 @@
                                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
                             </svg>
-                            <span class="side-menu__label">Propatiz App image</span></a>
+                            <span class="side-menu__label">Sports</span></a>
                     </li>
 
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('service_img.index')}}">
+                        <a class="side-menu__item" href="{{route('index.stationaries')}}">
                             <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                 stroke-linecap="round" stroke-linejoin="round">
@@ -184,16 +184,16 @@
                                 <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
                                 <line x1="12" y1="22.08" x2="12" y2="12"></line>
                             </svg>
-                            <span class="side-menu__label">Home Service image</span></a>
+                            <span class="side-menu__label">stationaries</span></a>
                     </li>
                     <li class="slide">
-                        <a class="side-menu__item" href="{{route('testimonials.index')}}">
+                        <a class="side-menu__item" href="{{route('index.libraries')}}">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                 stroke-linejoin="round" class="side-menu__icon">
                                 <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                             </svg>
-                            <span class="side-menu__label">Testimonials</span></a>
+                            <span class="side-menu__label">Library</span></a>
                     </li>
 
 
@@ -225,7 +225,7 @@
                                             </svg>
                                         </a>
                                         <a class="close-toggle" href="#">
-                                            <svg class="header-icon mt-1" xmlns="http://www.w3.org/2000/svg" height="24"
+                                            <svg class="header-icon mt-1" xmlns="https://i.imghippo.com/files/ynwR3604kw.png" height="24"
                                                 viewBox="0 0 24 24" width="24">
                                                 <path d="M0 0h24v24H0V0z" fill="none" />
                                                 <path
@@ -248,8 +248,8 @@
                                         <a href="#" class="nav-link pr-0 leading-none" data-toggle="dropdown">
                                             <span>
                                                 <img src="{{ Auth::user()->image ? asset(Auth::user()->image) : asset('images/placeholder.png') }}"
-                                                    alt="img" style="height: 60px; width:60px;">
-                                                <img src="https://i.imghippo.com/files/pOnh7024o.png"
+                                                    alt="img" style="height: 100px; width:100px;">
+                                                <img src="https://i.imghippo.com/files/R3552HkQ.png"
                                                     class="avatar avatar-sm brround" style="height: 60px; width:60px;">
                                             </span>
                                         </a>
