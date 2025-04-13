@@ -12,6 +12,7 @@ class StationaryController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Stationaries']);
         $stationaries = Stationary::all();
         return view('stationaries.index', compact('stationaries'));
     }
@@ -56,14 +57,37 @@ class StationaryController extends Controller
             'brand' => 'nullable|string|max:255',
             'in_stock' => 'nullable|integer',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'price' => 'required|string',
+            'discount' => 'nullable|string',
             'desc' => 'nullable|string',
         ]);
 
-        Stationary::create($request->all());
+        $stationaries = new Stationary();
+        $stationaries->name = $request->name;
+        $stationaries->category = $request->category;
+        $stationaries->color = $request->color;
+        $stationaries->brand = $request->brand;
+        $stationaries->in_stock = $request->in_stock;
+        $stationaries->condition = $request->condition;
+        $stationaries->price = $request->price;
+        $stationaries->discount = $request->discount;
+        $stationaries->desc = $request->desc;
 
-        return redirect()->route('stationaries.index')->with('success', 'Stationary created successfully.');
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('images/labs', 'public');
+            $stationaries->avatar = $avatarPath;
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath[] = $image->store('images/labs', 'public');
+            }
+            $stationaries->images = json_encode($imagePath);
+        }
+
+        $stationaries ->save();
+
+        return redirect()->route('index.stationaries')->with('success', 'Stationary created successfully.');
     }
 
     /**

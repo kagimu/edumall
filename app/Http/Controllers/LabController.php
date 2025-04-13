@@ -12,6 +12,7 @@ class LabController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Laboratory Items']);
         $labs = Lab::all();
         return view('labs.index', compact('labs'));
     }
@@ -44,10 +45,10 @@ class LabController extends Controller
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB for each image
             'color' => 'nullable|string',
             'brand' => 'nullable|string',
-            'in_stock' => 'nullable|integer',
+            'in_stock' => 'nullable|string',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'price' => 'required|string',
+            'discount' => 'nullable|string',
             'desc' => 'nullable|string',
         ]);
 
@@ -76,7 +77,7 @@ class LabController extends Controller
 
         $lab->save();
 
-        return redirect()->route('labs.index')->with('success', 'Lab created successfully.');
+        return redirect()->route('index.labs')->with('success', 'Lab created successfully.');
     }
 
     /**

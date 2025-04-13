@@ -12,8 +12,9 @@ class ComputerLabController extends Controller
      */
     public function index()
     {
-        $computerLabs = ComputerLab::all();
-        return view('computerlabs.index', compact('computerLabs'));
+        session(['title' => 'Computer computerLabs']);
+        $computerlabs = ComputerLab::all();
+        return view('computerlabs.index', compact('computerlabs'));
     }
 
     /**
@@ -26,21 +27,21 @@ class ComputerLabController extends Controller
 
     public function getComputerLab()
     {
-        $computerLabs = ComputerLab::all();
-        return response()->json($computerLabs);
+        $computerlabs = ComputerLab::all();
+        return response()->json($computerlabs);
     }
 
 
     public function getComputerLabByCategory($category)
     {
-        $computerLabs = ComputerLab::where('category', $category)->get();
-        return response()->json($computerLabs);
+        $computerlabs = ComputerLab::where('category', $category)->get();
+        return response()->json($computerlabs);
     }
 
     public function getComputerLabById($id)
     {
-        $computerLab = ComputerLab::findOrFail($id);
-        return response()->json($computerLab);
+        $ComputerLab = ComputerLab::findOrFail($id);
+        return response()->json($ComputerLab);
     }
 
     /**
@@ -51,69 +52,92 @@ class ComputerLabController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'images' => 'nullable|array',
-            'color' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'in_stock' => 'nullable|integer',
+            'avatar' => 'nulcomputerLable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'nulcomputerLable|array',
+            'color' => 'nulcomputerLable|string|max:255',
+            'brand' => 'nulcomputerLable|string|max:255',
+            'in_stock' => 'nulcomputerLable|integer',
             'condition' => 'required|in:new,old',
             'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
-            'desc' => 'nullable|string|max:1000',
+            'discount' => 'nulcomputerLable|numeric',
+            'desc' => 'nulcomputerLable|string|max:1000',
         ]);
 
-        ComputerLab::create($request->all());
+        $computerLab = new ComputerLab();
+        $computerLab->name = $request->name;
+        $computerLab->category = $request->category;
+        $computerLab->color = $request->color;
+        $computerLab->brand = $request->brand;
+        $computerLab->in_stock = $request->in_stock;
+        $computerLab->condition = $request->condition;
+        $computerLab->price = $request->price;
+        $computerLab->discount = $request->discount;
+        $computerLab->desc = $request->desc;
 
-        return redirect()->route('computerlabs.index')->with('success', 'Computer Lab created successfully.');
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('images/computerLabs', 'public');
+            $computerLab->avatar = $avatarPath;
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath[] = $image->store('images/computerLabs', 'public');
+            }
+            $computerLab->images = json_encode($imagePath);
+        }
+
+        $computerLab->save();
+
+        return redirect()->route('index.computerlabs')->with('success', 'Computer computerLab created successfully.');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(ComputerLab $computerLab)
+    public function show(ComputerLab $ComputerLab)
     {
-        return view('computerlabs.show', compact('computerLab'));
+        return view('computerlabs.show', compact('ComputerLab'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(ComputerLab $computerLab)
+    public function edit(ComputerLab $ComputerLab)
     {
-        return view('computerlabs.edit', compact('computerLab'));
+        return view('computerlabs.edit', compact('ComputerLab'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ComputerLab $computerLab)
+    public function update(Request $request, ComputerLab $ComputerLab)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'images' => 'nullable|array',
-            'color' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'in_stock' => 'nullable|integer',
+            'avatar' => 'nulcomputerLable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'nulcomputerLable|array',
+            'color' => 'nulcomputerLable|string|max:255',
+            'brand' => 'nulcomputerLable|string|max:255',
+            'in_stock' => 'nulcomputerLable|integer',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
-            'desc' => 'nullable|string|max:1000',
+            'price' => 'required|string',
+            'discount' => 'nulcomputerLable|string',
+            'desc' => 'nulcomputerLable|string|max:1000',
         ]);
 
-        $computerLab->update($request->all());
+        $ComputerLab->update($request->all());
 
-        return redirect()->route('computerlabs.index')->with('success', 'Computer Lab updated successfully.');
+        return redirect()->route('computerlabs.index')->with('success', 'Computer computerLab updated successfully.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ComputerLab $computerLab)
+    public function destroy(ComputerLab $ComputerLab)
     {
-        $computerLab->delete();
+        $ComputerLab->delete();
 
-        return redirect()->route('computerlabs.index')->with('success', 'Computer Lab deleted successfully.');
+        return redirect()->route('computerlabs.index')->with('success', 'Computer computerLab deleted successfully.');
     }
 }

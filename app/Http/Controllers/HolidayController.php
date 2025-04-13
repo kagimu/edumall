@@ -12,6 +12,7 @@ class HolidayController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Holidays']);
         $holidays = Holiday::all();
         return view('holidays.index', compact('holidays'));
     }
@@ -57,12 +58,36 @@ class HolidayController extends Controller
             'brand' => 'nullable|string|max:255',
             'in_stock' => 'nullable|integer|min:0',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0|max:100',
+            'price' => 'required|string|min:0',
+            'discount' => 'nullable|string|min:0|max:100',
             'desc' => 'nullable|string|max:1000'
         ]);
 
-        $holiday = Holiday::create($request->all());
+        
+        $holidays = new Holiday();
+        $holidays->name = $request->name;
+        $holidays->category = $request->category;
+        $holidays->color = $request->color;
+        $holidays->brand = $request->brand;
+        $holidays->in_stock = $request->in_stock;
+        $holidays->condition = $request->condition;
+        $holidays->price = $request->price;
+        $holidays->discount = $request->discount;
+        $holidays->desc = $request->desc;
+
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('images/labs', 'public');
+            $holidays->avatar = $avatarPath;
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath[] = $image->store('images/labs', 'public');
+            }
+            $holidays->images = json_encode($imagePath);
+        }
+
+        $holidays->save();
 
         return redirect()->route('holidays.index')->with('success', 'Holiday created successfully.');
     }

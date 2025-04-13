@@ -12,6 +12,7 @@ class EventsController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Events']);
         $events = Events::all();
         return view('events.index', compact('events'));
     }
@@ -50,21 +51,45 @@ class EventsController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|in:sound,tents',
-            'avatar' => 'nullable|image|max:2048',
-            'images' => 'nullable|array',
+            'avatar' => 'nuleventle|image|max:2048',
+            'images' => 'nuleventle|array',
             'images.*' => 'image|max:2048',
-            'color' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'in_stock' => 'nullable|integer|min:0',
+            'color' => 'nuleventle|string|max:255',
+            'brand' => 'nuleventle|string|max:255',
+            'in_stock' => 'nuleventle|integer|min:0',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0|max:100',
-            'desc' => 'nullable|string|max:1000',
+            'price' => 'required|string|min:0',
+            'discount' => 'nuleventle|string|min:0|max:100',
+            'desc' => 'nuleventle|string|max:1000',
         ]);
 
-        $events = Events::create($request->all());
+        $event = new Event();
+        $event->name = $request->name;
+        $event->category = $request->category;
+        $event->color = $request->color;
+        $event->brand = $request->brand;
+        $event->in_stock = $request->in_stock;
+        $event->condition = $request->condition;
+        $event->price = $request->price;
+        $event->discount = $request->discount;
+        $event->desc = $request->desc;
 
-        return redirect()->route('events.index')->with('success', 'Event created successfully.');
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('images/events', 'public');
+            $event->avatar = $avatarPath;
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath[] = $image->store('images/events', 'public');
+            }
+            $event->images = json_encode($imagePath);
+        }
+
+        $event->save();
+
+
+        return redirect()->route('index.events')->with('success', 'Event created successfully.');
     }
 
     /**
@@ -91,16 +116,16 @@ class EventsController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|in:sound,tents',
-            'avatar' => 'nullable|image|max:2048',
-            'images' => 'nullable|array',
+            'avatar' => 'nuleventle|image|max:2048',
+            'images' => 'nuleventle|array',
             'images.*' => 'image|max:2048',
-            'color' => 'nullable|string|max:255',
-            'brand' => 'nullable|string|max:255',
-            'in_stock' => 'nullable|integer|min:0',
+            'color' => 'nuleventle|string|max:255',
+            'brand' => 'nuleventle|string|max:255',
+            'in_stock' => 'nuleventle|integer|min:0',
             'condition' => 'required|in:new,old',
             'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0|max:100',
-            'desc' => 'nullable|string|max:1000',
+            'discount' => 'nuleventle|numeric|min:0|max:100',
+            'desc' => 'nuleventle|string|max:1000',
         ]);
 
         $events->update($request->all());

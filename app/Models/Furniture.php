@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 class Furniture extends Model
 {
     use HasFactory;
-    protected $table = 'furnitures';
+    protected $table = 'furniture';
     protected $fillable = [
         'name',
         'category',

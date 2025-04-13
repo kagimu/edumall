@@ -248,7 +248,7 @@
                                         <a href="#" class="nav-link pr-0 leading-none" data-toggle="dropdown">
                                             <span>
                                                 <img src="{{ Auth::user()->image ? asset(Auth::user()->image) : asset('images/placeholder.png') }}"
-                                                    alt="img" style="height: 100px; width:100px;">
+                                                    alt="img" style="height: 60px; width:60px;">
                                                 <img src="https://i.imghippo.com/files/R3552HkQ.png"
                                                     class="avatar avatar-sm brround" style="height: 60px; width:60px;">
                                             </span>
@@ -256,7 +256,7 @@
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow animated">
                                             <div class="text-center">
                                                 <a href="#"
-                                                    class="dropdown-item text-center user pb-0 font-weight-bold">{{Auth::user()->first_name
+                                                    class="dropdown-item text-center user pb-0 font-weight-bold">{{Auth::user()->name
                                                     . " " .Auth::user()->last_name}}</a>
                                                 <span class="text-center user-semi-title">System Administrator</span>
                                                 <div class="dropdown-divider"></div>

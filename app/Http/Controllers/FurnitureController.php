@@ -12,6 +12,7 @@ class FurnitureController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Furniture']);
         $furnitures = Furniture::all();
         return view('furnitures.index', compact('furnitures'));
     }
@@ -38,14 +39,38 @@ class FurnitureController extends Controller
             'brand' => 'nullable|string|max:255',
             'in_stock' => 'nullable|integer',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'price' => 'required|string',
+            'discount' => 'nullable|string',
             'desc' => 'nullable|string|max:1000',
         ]);
 
-        Furniture::create($request->all());
+        
+        $furniture = new Furniture();
+        $furniture->name = $request->name;
+        $furniture->category = $request->category;
+        $furniture->color = $request->color;
+        $furniture->brand = $request->brand;
+        $furniture->in_stock = $request->in_stock;
+        $furniture->condition = $request->condition;
+        $furniture->price = $request->price;
+        $furniture->discount = $request->discount;
+        $furniture->desc = $request->desc;
 
-        return redirect()->route('furnitures.index')->with('success', 'Furniture created successfully.');
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('images/labs', 'public');
+            $furniture->avatar = $avatarPath;
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath[] = $image->store('images/labs', 'public');
+            }
+            $furniture->images = json_encode($imagePath);
+        }
+
+        $furniture->save();
+
+        return redirect()->route('index.furnitures')->with('success', 'Furniture created successfully.');
     }
 
     /**

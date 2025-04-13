@@ -12,6 +12,7 @@ class SportsController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Sports Items']);
         $sports = Sports::all();
         return view('sports.index', compact('sports'));
     }
@@ -49,7 +50,7 @@ class SportsController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|in:balls,jerseys,board_games,indoor_games',
+            'category' => 'required|in:jerseys,board_games,indoor_games,balls',
             'avatar' => 'nullable|image|max:2048',
             'images' => 'nullable|array',
             'images.*' => 'image|max:2048',
@@ -57,14 +58,37 @@ class SportsController extends Controller
             'brand' => 'nullable|string|max:255',
             'in_stock' => 'nullable|integer|min:0',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric|min:0',
-            'discount' => 'nullable|numeric|min:0|max:' . $request->price,
+            'price' => 'required|string|min:0',
+            'discount' => 'nullable|string|min:0|max:' . $request->price,
             'desc' => 'nullable|string|max:1000',
         ]);
 
-        $sports = Sports::create($request->all());
+        $sports = new Sport();
+        $sports->name = $request->name;
+        $sports->category = $request->category;
+        $sports->color = $request->color;
+        $sports->brand = $request->brand;
+        $sports->in_stock = $request->in_stock;
+        $sports->condition = $request->condition;
+        $sports->price = $request->price;
+        $sports->discount = $request->discount;
+        $sports->desc = $request->desc;
 
-        return redirect()->route('sports.index')->with('success', 'Sports created successfully.');
+        if ($request->hasFile('avatar')) {
+            $avatarPath = $request->file('avatar')->store('images/labs', 'public');
+            $sports->avatar = $avatarPath;
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $imagePath[] = $image->store('images/labs', 'public');
+            }
+            $sports->images = json_encode($imagePath);
+        }
+
+        $sports ->save();
+
+        return redirect()->route('index.sports')->with('success', 'Sports created successfully.');
     }
 
     /**

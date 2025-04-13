@@ -12,6 +12,7 @@ class LibraryController extends Controller
      */
     public function index()
     {
+        session(['title' => 'Library']);
         $libraries = Library::all();
         return view('libraries.index', compact('libraries'));
     }
@@ -46,8 +47,8 @@ class LibraryController extends Controller
             'brand' => 'nullable|string',
             'in_stock' => 'nullable|integer',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'price' => 'required|string',
+            'discount' => 'nullable|string',
             'desc' => 'nullable|string',
         ]);
 
