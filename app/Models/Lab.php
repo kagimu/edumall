@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Lab extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'category',
+        'avatar',
+        'images',
+        'color',
+        'brand',
+        'in_stock',
+        'condition',
+        'price',
+        'discount',
+        'desc',
+    ];
+
+    protected $casts = [
+        'images' => 'array', // Casts the JSON field to an array
+    ];
+    protected $attributes = [
+        'images' => '[]', // Default value for images
+    ];
+    protected $appends = ['images_array', 'avatar_url', 'images_url'];
+
+    
+    public function getImagesArrayAttribute()
+    {
+        return json_decode($this->images, true);
+    }
+    public function getAvatarUrlAttribute()
+    {
+        return url('storage/' . $this->avatar);
+    }
+    public function getImagesUrlAttribute()
+    {
+        return array_map(function ($image) {
+            return url('storage/' . $image);
+        }, $this->images);
+    }
+}
