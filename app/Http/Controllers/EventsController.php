@@ -138,6 +138,19 @@ class EventsController extends Controller
      */
     public function destroy(Events $events)
     {
+         // Delete the avatar image
+         if ($events->avatar) {
+            \Storage::delete('public/' . $events->avatar);
+        }
+
+        // Delete the images
+        if (isset($events->images)) {
+            foreach (json_decode($events->images) as $image) {
+                \Storage::delete('public/' . $image);
+            }
+        }
+
+
         $events->delete();
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');

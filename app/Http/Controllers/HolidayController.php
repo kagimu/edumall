@@ -138,6 +138,19 @@ class HolidayController extends Controller
      */
     public function destroy(Holiday $holiday)
     {
+         // Delete the avatar image
+         if ($holiday->avatar) {
+            \Storage::delete('public/' . $holiday->avatar);
+        }
+
+        // Delete the images
+        if (isset($holiday->images)) {
+            foreach (json_decode($holiday->images) as $image) {
+                \Storage::delete('public/' . $image);
+            }
+        }
+
+    
         $holiday->delete();
 
         return redirect()->route('holidays.index')->with('success', 'Holiday deleted successfully.');

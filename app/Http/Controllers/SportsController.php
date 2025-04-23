@@ -137,6 +137,18 @@ class SportsController extends Controller
      */
     public function destroy(Sports $sports)
     {
+        // Delete the avatar image
+        if ($sports->avatar) {
+            \Storage::delete('public/' . $sports->avatar);
+        }
+
+        // Delete the images
+        if (isset($sports->images)) {
+            foreach (json_decode($sports->images) as $image) {
+                \Storage::delete('public/' . $image);
+            }
+        }
+
         $sports->delete();
 
         return redirect()->route('sports.index')->with('success', 'Sports deleted successfully.');

@@ -52,12 +52,12 @@
                                 <td>{{$opportunity->date}}</td>
                                 <td>
                                 @if(!empty($opportunity->avatar) && is_string($opportunity->avatar))
-                                    <img src="{{ asset('storage/' . $opportunity->avatar) }}" alt="Image" width="200" height="200">
+                                    <img src="{{ asset('storage/' . $opportunity->avatar) }}" alt="avatar" width="200" height="200">
                                 @endif
                                 </td>
                                 <td>{{$opportunity->created_at}}</td>
                                 <td>
-                                        <form action="{{ route('destroy.labs', $opportunity->id) }}" method="POST" style="display: inline;">
+                                        <form action="{{ route('destroy.sports', $opportunity->id) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-light" onclick="return confirm('Are you sure you want to delete this blog?')">

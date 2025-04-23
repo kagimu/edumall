@@ -118,6 +118,19 @@ class FurnitureController extends Controller
      */
     public function destroy(Furniture $furniture)
     {
+         // Delete the avatar image
+         if ($furniture->avatar) {
+            \Storage::delete('public/' . $furniture->avatar);
+        }
+
+        // Delete the images
+        if (isset($furniture->images)) {
+            foreach (json_decode($furniture->images) as $image) {
+                \Storage::delete('public/' . $image);
+            }
+        }
+
+
         $furniture->delete();
 
         return redirect()->route('furnitures.index')->with('success', 'Furniture deleted successfully.');

@@ -136,6 +136,17 @@ class ComputerLabController extends Controller
      */
     public function destroy(ComputerLab $ComputerLab)
     {
+         // Delete the avatar image
+         if ($ComputerLab->avatar) {
+            \Storage::delete('public/' . $ComputerLab->avatar);
+        }
+
+        // Delete the images
+        if (isset($ComputerLab->images)) {
+            foreach (json_decode($ComputerLab->images) as $image) {
+                \Storage::delete('public/' . $image);
+            }
+        }
         $ComputerLab->delete();
 
         return redirect()->route('computerlabs.index')->with('success', 'Computer computerLab deleted successfully.');

@@ -135,6 +135,18 @@ class StationaryController extends Controller
      */
     public function destroy(Stationary $stationary)
     {
+          // Delete the avatar image
+          if ($stationary->avatar) {
+            \Storage::delete('public/' . $stationary->avatar);
+        }
+
+        // Delete the images
+        if (isset($stationary->images)) {
+            foreach (json_decode($stationary->images) as $image) {
+                \Storage::delete('public/' . $image);
+            }
+        }
+
         $stationary->delete();
 
         return redirect()->route('stationaries.index')->with('success', 'Stationary deleted successfully.');

@@ -40,8 +40,10 @@ class Sports extends Model
     }
     public function getImagesUrlAttribute()
     {
+        $images = is_array($this->images) ? $this->images : json_decode($this->images, true) ?? [];
         return array_map(function ($image) {
             return asset('storage/' . $image);
-        }, $this->images);
+        }, $images);
     }
+
 }
