@@ -18,7 +18,7 @@
                 <div class="d-flex no-block align-items-center">
                     <div>
                         <h6 class="text-white">Laboratory Products</h6>
-                        <h2 class="text-white m-0 font-weight-bold">{{$labs}}</h2>
+                        <h2 class="text-white m-0 font-weight-bold">{{ $labs ?? '0' }}</h2>
                     </div>
                     <div class="ml-auto">
                         <span class="text-white display-6"><i class="fa fa-file-text-o fa-2x"></i></span>
@@ -48,7 +48,7 @@
                 <div class="d-flex no-block align-items-center">
                     <div>
                         <h6 class="text-white">Library books</h6>
-                        <h2 class="text-white m-0 font-weight-bold">{{$libraries}}</h2>
+                        <h2 class="text-white m-0 font-weight-bold">{{$libraries  ?? '0'}}</h2>
                     </div>
                     <div class="ml-auto">
                         <span class="text-white display-6"><i class="fa fa-wrench fa-2x"></i></span>
