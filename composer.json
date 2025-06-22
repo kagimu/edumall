@@ -1,4 +1,4 @@
- {
+{
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
@@ -8,8 +8,11 @@
     "require": {
         "php": "^8.2",
         "laravel/framework": "^12.0",
+        "laravel/passport": "^13.0",
+        "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.10.1",
-        "laravel/ui": "^4.6"
+        "laravel/ui": "^4.6",
+        "twilio/sdk": "^8.6"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

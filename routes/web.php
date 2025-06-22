@@ -12,7 +12,6 @@ use App\Http\Controllers\ComputerLabController;
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Auth;
 
-Auth::routes();
 
 
 Route::get('/dashboard', function () {

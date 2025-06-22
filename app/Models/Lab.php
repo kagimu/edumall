@@ -11,6 +11,9 @@ class Lab extends Model
     use HasFactory;
     protected $table = 'labs';
 
+  
+
+
     protected $fillable = [
         'name',
         'category',
@@ -44,8 +47,15 @@ class Lab extends Model
     }
     public function getImagesUrlAttribute()
     {
+        $images = $this->images;
+        // Ensure $images is an array
+        if (!is_array($images)) {
+            $images = json_decode($images, true) ?: []; // Fallback to an empty array if decoding fails
+        }
+
         return array_map(function ($image) {
             return url('storage/' . $image);
-        }, $this->images);
+        }, $images);
     }
+
 }

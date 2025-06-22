@@ -28,8 +28,20 @@ class LabController extends Controller
     public function getLab()
     {
         $labs = Lab::all();
-        return response()->json($labs);
+
+        if ($labs->isEmpty()) {
+            return response()->json([
+                'message' => 'No labs found.',
+                'data' => []
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Labs retrieved successfully.',
+            'data' => $labs
+        ], 200);
     }
+
    
 
     /**
