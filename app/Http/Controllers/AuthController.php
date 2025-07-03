@@ -14,39 +14,37 @@ class AuthController extends Controller
    public function register(Request $request)
 {
     $request->validate([
-        'name' => 'required|string|max:255',
+        'firstName' => 'required|string|max:255',
+        'lastName' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:6|confirmed',
         'accountType' => 'required|in:individual,institution',
-        'phone_number' => 'required|string|max:15',
-        'institution_name' => 'required_if:accountType,institution|string|max:255',
-        'centre_number' => 'required_if:accountType,institution|string|max:255',
-        'district' => 'nullable|string|max:255',
-        'subcounty' => 'nullable|string|max:255',
-        'parish' => 'nullable|string|max:255',
-        'village' => 'nullable|string|max:255',
-        'admin_name' => 'required_if:accountType,institution|string|max:255',
-        'admin_designation' => 'required_if:accountType,institution|string|max:255',
-        'admin_email' => 'required_if:accountType,institution|email|max:255',
-        'admin_number' => 'required_if:accountType,institution|string|max:15',
+        'phone' => 'required|string|max:15',
+        
     ]);
 
     $user = User::create([
-        'name' => $request->name,
+        'firstName' => $request->firstName,
+        'lastName' => $request->lastName,
+        'bankAccount' => $request->bankAccount,
+        'mobileMoneyNumber' => $request->mobileMoneyNumber,
+        'paymentMethods' => $request->paymentMethods,
+        'userType' => $request->userType,
+        'customUserType' => $request->customUserType,
         'email' => $request->email,
         'password' => Hash::make($request->password),
         'accountType' => $request->accountType,
-        'phone_number' => $request->phone_number,
+        'phone' => $request->phone,
         'institution_name' => $request->accountType === 'institution' ? $request->institution_name : null,
         'centre_number' => $request->accountType === 'institution' ? $request->centre_number : null,
         'district' => $request->district,
         'subcounty' => $request->subcounty,
         'parish' => $request->parish,
         'village' => $request->village,
-        'admin_name' => $request->accountType === 'institution' ? $request->admin_name : null,
-        'admin_designation' => $request->accountType === 'institution' ? $request->admin_designation : null,
-        'admin_email' => $request->accountType === 'institution' ? $request->admin_email : null,
-        'admin_number' => $request->accountType === 'institution' ? $request->admin_number : null,
+        'adminName' => $request->accountType === 'institution' ? $request->adminName : null,
+        'customDesignation' => $request->accountType === 'institution' ? $request->customDesignation : null,
+        'adminEmail' => $request->accountType === 'institution' ? $request->adminEmail : null,
+        'adminPhone' => $request->accountType === 'institution' ? $request->adminPhone : null,
     ]);
 
     $token = $user->createToken('authToken')->plainTextToken;

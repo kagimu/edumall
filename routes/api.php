@@ -41,3 +41,5 @@ Route::get('/furniture', [FurnitureController::class, 'getFurniture']);
 Route::get('/libraries', [LibraryController::class, 'getLibraries'])->name('api.libraries') ;
 Route::get('/labs', [LabController::class, 'getLab'])->name('api.lab');
 Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
+
+Route::post('/labs', [LabController::class, 'store'])->name('api.lab');

@@ -23,6 +23,8 @@ class Kernel extends HttpKernel
         // Validate post size
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
 
+          \Illuminate\Http\Middleware\HandleCors::class,
+
         // Trim and normalize strings
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,

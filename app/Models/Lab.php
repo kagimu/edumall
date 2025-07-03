@@ -20,12 +20,13 @@ class Lab extends Model
         'avatar',
         'images',
         'color',
-        'brand',
+        'rating',
         'in_stock',
         'condition',
         'price',
-        'discount',
+        'unit',
         'desc',
+        "purchaseType",
     ];
 
     protected $casts = [

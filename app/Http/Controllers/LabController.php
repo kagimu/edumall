@@ -56,23 +56,25 @@ class LabController extends Controller
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB for each image
             'color' => 'nullable|string',
-            'brand' => 'nullable|string',
+            'rating' => 'nullable|string',
             'in_stock' => 'nullable|string',
             'condition' => 'required|in:new,old',
             'price' => 'required|string',
-            'discount' => 'nullable|string',
+            'unit' => 'nullable|string',
             'desc' => 'nullable|string',
         ]);
 
         $lab = new Lab();
         $lab->name = $request->name;
         $lab->category = $request->category;
+        $lab->purchaseType = $request->purchaseType;
+        $lab->category = $request->category;
         $lab->color = $request->color;
-        $lab->brand = $request->brand;
+        $lab->rating = $request->rating;
         $lab->in_stock = $request->in_stock;
         $lab->condition = $request->condition;
         $lab->price = $request->price;
-        $lab->discount = $request->discount;
+        $lab->unit = $request->unit;
         $lab->desc = $request->desc;
 
         if ($request->hasFile('avatar')) {

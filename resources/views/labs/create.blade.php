@@ -59,9 +59,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="brand" class="form-label">Product brand:</label>
-                    <input type="text" name="brand" class="form-control" placeholder="">
-                    @error('brand')
+                    <label for="rating" class="form-label">Product rating scale from 1 to 5:</label>
+                    <input type="text" name="rating" class="form-control" placeholder="">
+                    @error('rating')
                     <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
                     @enderror
                 </div>
@@ -82,10 +82,18 @@
                     @enderror
                 </div>
 
+                 <div class="form-group">
+                    <label for="purchaseType" class="form-label">Is the Product for purchase or hire?</label>
+                    <input type="text" name="purchaseType" class="form-control" placeholder="">
+                    @error('purchaseType')
+                    <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
+                    @enderror
+                </div>
+
                 <div class="form-group">
-                    <label for="discount" class="form-label">Price discount if available:</label>
-                    <input type="text" name="discount" class="form-control" placeholder="">
-                    @error('discount')
+                    <label for="unit" class="form-label">Product unit (piece, kg, packet):</label>
+                    <input type="text" name="unit" class="form-control" placeholder="">
+                    @error('unit')
                     <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
                     @enderror
                 </div>
