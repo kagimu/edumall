@@ -23,15 +23,15 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/cart/all', [CartController::class, 'allCarts']);
+    Route::post('/cart/add', [CartController::class, 'add']);
+    Route::post('/cart/remove', [CartController::class, 'remove']);
+    Route::get('/cart', [CartController::class, 'view']);
+    Route::post('/order', [OrderController::class, 'placeOrder']);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
 
 //cart and order routes
-Route::post('/cart/add', [CartController::class, 'add']);
-Route::post('/cart/remove', [CartController::class, 'remove']);
-Route::get('/cart', [CartController::class, 'view']);
-Route::post('/order', [OrderController::class, 'placeOrder']);
-
 // API routes for various resources
 Route::get('/stationary', [StationaryController::class, 'getStationary']);
 Route::get('/sports', [SportsController::class, 'getSports']);
