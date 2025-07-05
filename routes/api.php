@@ -24,13 +24,16 @@ Route::post('/login', [AuthController::class, 'login']);
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cart/all', [CartController::class, 'allCarts']);
-    Route::post('/cart/add', [CartController::class, 'add']);
-    Route::post('/cart/remove', [CartController::class, 'remove']);
-    Route::get('/cart', [CartController::class, 'view']);
-    Route::post('/order', [OrderController::class, 'placeOrder']);
+    Route::get('/cart', [CartController::class, 'view']);               // ✅ Fetch cart
+    Route::post('/cart/add', [CartController::class, 'add']);           // ✅ Add to cart
+    Route::put('/cart/{product_id}', [CartController::class, 'update']); // ✅ Update quantity
+    Route::delete('/cart/{product_id}', [CartController::class, 'remove']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/checkout', [OrderController::class, 'checkout']);
+    Route::post('/pay', [OrderController::class, 'initiatePayment']);
 });
 
+Route::post('/flutterwave/webhook', [CheckoutController::class, 'handleWebhook']);
 //cart and order routes
 // API routes for various resources
 Route::get('/stationary', [StationaryController::class, 'getStationary']);

@@ -17,6 +17,13 @@ return [
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],
+    
+    'flutterwave' => [
+        'public_key' => env('FLW_PUBLIC_KEY'),
+        'secret_key' => env('FLW_SECRET_KEY'),
+        'encryption_key' => env('FLW_ENCRYPTION_KEY'),
+        'redirect_url' => env('FLW_PAYMENT_REDIRECT'),
+    ],
 
     'ses' => [
         'key' => env('AWS_ACCESS_KEY_ID'),

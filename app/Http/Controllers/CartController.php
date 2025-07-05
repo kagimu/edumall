@@ -65,20 +65,18 @@ class CartController extends Controller
 
     public function remove(Request $request)
 
-        {
-            $request->validate(['product_id' => 'required|exists:labs,id']);
-
-            $user = Auth::user();
+    {
+        $user = Auth::user();
             if (!$user) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
             Cart::where('user_id', $user->id)
-                ->where('product_id', $request->product_id)
+                ->where('product_id', $product_id)
                 ->delete();
 
             return response()->json(['message' => 'Product removed from cart'], 200);
-        }
+    }
 
 
     public function view()
@@ -98,12 +96,36 @@ class CartController extends Controller
                         'product_id' => $item->product_id,
                         'name' => $item->product->name ?? 'N/A',
                         'price' => $item->product->price ?? 0,
-                        'avatar' => $item->product->avatar_url ?? null,
+                       'avatar' => $item->product->avatar ? asset('storage/' . $item->product->avatar) : null,
                         'quantity' => $item->quantity,
                     ];
                 });
 
             return response()->json(['cart' => $cartItems], 200);
         }
+
+        public function update(Request $request, $product_id)
+            {
+                $request->validate(['quantity' => 'required|integer|min:1']);
+
+                $user = Auth::user();
+                if (!$user) {
+                    return response()->json(['error' => 'Unauthorized'], 401);
+                }
+
+                $cartItem = Cart::where('user_id', $user->id)
+                    ->where('product_id', $product_id)
+                    ->first();
+
+                if (!$cartItem) {
+                    return response()->json(['error' => 'Item not found in cart'], 404);
+                }
+
+                $cartItem->quantity = $request->quantity;
+                $cartItem->save();
+
+                return response()->json(['message' => 'Quantity updated'], 200);
+            }
+
 
 }
