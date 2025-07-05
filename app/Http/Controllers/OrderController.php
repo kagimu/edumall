@@ -44,6 +44,18 @@ class OrderController extends Controller
         return response()->json(['order' => $order], 200);
     }
 
+    public function dashboard()
+    {
+         session(['title' => 'Dashboard']);
+
+        $labs = number_format(Lab::count());
+        $libraries = number_format(Library::count());
+        $stationaries = number_format(Stationary::count());
+        $orders = Order::with('user')->latest()->get();
+
+        return view('dashboard', compact('labs', 'libraries', 'stationaries', 'orders'));
+    }
+
     public function initiatePayment(Request $request)
         {
             $user = Auth::user();
@@ -72,5 +84,30 @@ class OrderController extends Controller
             return response()->json($paymentData);
         }
 
+        public function confirmPayOnDelivery(Request $request, $orderId)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
+        $order = Order::where('id', $orderId)->where('user_id', $user->id)->first();
+
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        // Only allow status change if order is pending or pay_on_delivery
+        if (!in_array($order->status, ['pending', 'pay_on_delivery'])) {
+            return response()->json(['error' => 'Order payment cannot be confirmed'], 400);
+        }
+
+        $order->status = 'paid';
+        $order->save();
+
+        return response()->json([
+            'message' => 'Payment confirmed successfully.',
+            'order' => $order,
+        ]);
+    }
 }

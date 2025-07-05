@@ -91,5 +91,28 @@ class CheckoutController extends Controller
         ]);
     }
 
-   
+   public function confirmPayOnDelivery(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $order = Order::where('user_id', $user->id)->where('status', 'pending')->latest()->first();
+
+        if (!$order) {
+            return response()->json(['message' => 'No pending order found'], 404);
+        }
+
+        // Update order status to 'paid'
+        $order->status = 'paid';
+        $order->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order confirmed as Pay on Delivery and marked as paid.',
+            'order' => $order,
+        ]);
+    }
+
 }

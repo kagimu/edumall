@@ -27,10 +27,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cart', [CartController::class, 'view']);               // ✅ Fetch cart
     Route::post('/cart/add', [CartController::class, 'add']);           // ✅ Add to cart
     Route::put('/cart/{product_id}', [CartController::class, 'update']); // ✅ Update quantity
-    Route::delete('/cart/{product_id}', [CartController::class, 'remove']);
+    Route::delete('/cart/remove/{product_id}', [CartController::class, 'remove']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/checkout', [OrderController::class, 'checkout']);
     Route::post('/pay', [OrderController::class, 'initiatePayment']);
+    Route::post('/checkout/confirm-pay-on-delivery', [CheckoutController::class, 'confirmPayOnDelivery']);
+
 });
 
 Route::post('/flutterwave/webhook', [CheckoutController::class, 'handleWebhook']);

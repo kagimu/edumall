@@ -63,19 +63,19 @@ class CartController extends Controller
                 return response()->json(['message' => 'Product added to cart'], 200);
     }
 
-    public function remove(Request $request)
+    public function remove(Request $request, $product_id)
 
     {
-        $user = Auth::user();
-            if (!$user) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
+            $user = Auth::user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
 
-            Cart::where('user_id', $user->id)
-                ->where('product_id', $product_id)
-                ->delete();
+        Cart::where('user_id', $user->id)
+            ->where('product_id', $product_id)
+            ->delete();
 
-            return response()->json(['message' => 'Product removed from cart'], 200);
+        return response()->json(['message' => 'Product removed from cart'], 200);
     }
 
 

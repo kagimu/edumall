@@ -10,6 +10,10 @@ use App\Http\Controllers\LibraryController;
 use App\Http\Controllers\LabController;
 use App\Http\Controllers\ComputerLabController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -21,7 +25,8 @@ Route::get('/dashboard', function () {
 Route::middleware('auth')->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
-    
+     Route::get('/dashboard/orders', [OrderController::class, 'dashboard'])->name('dashboard.orders');
+    Route::post('/orders/{order}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirmPayment');
     Route::get('/stationaries', [StationaryController::class, 'index'])->name('index.stationaries');
     Route::get('/stationaries/create', [StationaryController::class, 'create'])->name('create.stationaries');
     Route::post('/stationaries/store', [StationaryController::class, 'store'])->name('store.stationaries');
