@@ -10,104 +10,121 @@ use Flutterwave\Rave;
 
 class OrderController extends Controller
 {
-   public function checkout(Request $request)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+    public function index(Request $request)
+        {
+            $user = $request->user();
 
-        $cartItems = Cart::where('user_id', $user->id)->with('product')->get();
-        if ($cartItems->isEmpty()) {
-            return response()->json(['error' => 'Cart is empty'], 400);
-        }
+            $orders = Order::with('items')
+                ->where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->get();
 
-        $total = $cartItems->sum(fn($item) => $item->quantity * $item->product->price);
-
-        $order = Order::create([
-            'user_id' => $user->id,
-            'total' => $total,
-            'status' => 'pending',
-        ]);
-
-        foreach ($cartItems as $item) {
-            $order->items()->create([
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'price' => $item->product->price,
+            return response()->json([
+                'orders' => $orders
             ]);
         }
 
-        // Optionally clear cart
-        Cart::where('user_id', $user->id)->delete();
+        /**
+         * Store a new order
+         */
 
-        return response()->json(['order' => $order], 200);
-    }
 
-    public function dashboard()
-    {
-         session(['title' => 'Dashboard']);
-
-        $labs = number_format(Lab::count());
-        $libraries = number_format(Library::count());
-        $stationaries = number_format(Stationary::count());
-        $orders = Order::with('user')->latest()->get();
-
-        return view('dashboard', compact('labs', 'libraries', 'stationaries', 'orders'));
-    }
-
-    public function initiatePayment(Request $request)
+    public function store(Request $request)
         {
-            $user = Auth::user();
-            $order = Order::where('user_id', $user->id)->latest()->first();
+            $user = auth()->user();
 
-            $reference = 'EDU-' . uniqid();
-            $order->payment_reference = $reference;
+            // Check for existing pending order
+            $pendingOrder = \App\Models\Order::where('user_id', $user->id)
+                ->where('payment_status', 'pending')
+                ->first();
+
+            if ($pendingOrder) {
+                return response()->json([
+                    'message' => 'You have a pending order. Please complete payment before making a new one.',
+                ], 403);
+            }
+
+            $validated = $request->validate([
+                'customer' => 'required|array',
+                'customer.name' => 'required|string',
+                'customer.email' => 'required|email',
+                'customer.phone' => 'required|string',
+                'address' => 'required|array',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|integer',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.price' => 'required|numeric',
+                'subtotal' => 'required|numeric',
+                'delivery_fee' => 'required|numeric',
+                'total' => 'required|numeric',
+                'payment_method' => 'required|string',
+                'payment_status' => 'required|in:pending,paid',
+            ]);
+
+            $order = new \App\Models\Order();
+            $order->user_id = $user->id;
+            $order->customer_name = $validated['customer']['name'];
+            $order->customer_email = $validated['customer']['email'];
+            $order->customer_phone = $validated['customer']['phone'];
+            $order->delivery_info = json_encode($validated['address']);
+            $order->subtotal = $validated['subtotal'];
+            $order->delivery_fee = $validated['delivery_fee'];
+            $order->total = $validated['total'];
+            $order->payment_method = $validated['payment_method'];
+            $order->payment_status = $validated['payment_status'];
             $order->save();
 
-            $paymentData = [
-                'tx_ref' => $reference,
-                'amount' => $order->total,
-                'currency' => 'UGX',
-                'payment_options' => 'mobilemoneyuganda',
-                'redirect_url' => 'http://localhost:8080/payment-success',
-                'customer' => [
-                    'email' => $user->email,
-                    'name' => $user->firstName,
-                ],
-                'customizations' => [
-                    'title' => 'EduMall Order',
-                    'description' => 'Payment for Order #' . $order->id
-                ],
-            ];
+            foreach ($validated['items'] as $item) {
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
 
-            return response()->json($paymentData);
+            return response()->json([
+                'message' => 'Order placed successfully',
+                'order_id' => $order->id,
+            ], 201);
         }
+
+        public function checkPendingOrder(Request $request)
+            {
+                $user = $request->user();
+
+                $pendingOrder = \App\Models\Order::where('user_id', $user->id)
+                    ->where('payment_status', 'pending')
+                    ->latest()
+                    ->first();
+
+                if ($pendingOrder) {
+                    return response()->json([
+                        'pending' => true,
+                        'order_id' => $pendingOrder->id,
+                    ]);
+                }
+
+                return response()->json(['pending' => false]);
+            }
+
 
         public function confirmPayOnDelivery(Request $request, $orderId)
-    {
-        $user = Auth::user();
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+            {
+                $user = auth()->user();
 
-        $order = Order::where('id', $orderId)->where('user_id', $user->id)->first();
+                $order = Order::where('id', $orderId)->where('user_id', $user->id)->first();
 
-        if (!$order) {
-            return response()->json(['error' => 'Order not found'], 404);
-        }
+                if (!$order || $order->payment_status !== 'pending') {
+                    return response()->json(['error' => 'Invalid or already paid order.'], 400);
+                }
 
-        // Only allow status change if order is pending or pay_on_delivery
-        if (!in_array($order->status, ['pending', 'pay_on_delivery'])) {
-            return response()->json(['error' => 'Order payment cannot be confirmed'], 400);
-        }
+                $order->update(['payment_status' => 'paid']);
 
-        $order->status = 'paid';
-        $order->save();
+                return response()->json([
+                    'message' => 'Payment status updated successfully.',
+                    'order' => $order,
+                ]);
+            }
 
-        return response()->json([
-            'message' => 'Payment confirmed successfully.',
-            'order' => $order,
-        ]);
-    }
+
 }
