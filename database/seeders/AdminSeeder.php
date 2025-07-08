@@ -20,7 +20,8 @@ class AdminSeeder extends Seeder
     	if(!$admin){
         	$admin = new User;
         }
-        $admin->name = "Kagimu Jay P";
+        $admin->firstName = "Kagimu ";
+        $admin->lastName = "JayP";
         $admin->email = "kagimujayp01@gmail.com";
         $admin->password = Hash::make("12345");
         $admin->position = 'Senior Developer';
@@ -31,7 +32,8 @@ class AdminSeeder extends Seeder
         if(!$admin2){
             $admin2 = new User;
         }
-        $admin2->name = "Joseph Prince";
+        $admin2->firstName = "Joseph Prince";
+        $admin2->lastName = "Mpoza";
         $admin2->email = "joseprincempoza@gmail.com ";
         $admin2->password = Hash::make("12345");
         $admin2->role = "admin";
@@ -42,7 +44,8 @@ class AdminSeeder extends Seeder
         if(!$admin3){
             $admin3 = new User;
         }
-        $admin3->name = "Mugisha David";
+        $admin3->firstName = "David";
+        $admin3->lastName = "Mugisha";
         $admin3->email = "mugishad43@gmail.com ";
         $admin3->password = Hash::make("12345");
         $admin3->role = "admin";

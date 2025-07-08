@@ -32,7 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/orders/pending', [OrderController::class, 'checkPendingOrder']);
     Route::post('/orders', [OrderController::class, 'store']);
-    Route::post('/checkout/confirm-pay-on-delivery/{orderId}', [OrderController::class, 'confirmPayOnDelivery']);
+    Route::post('/checkout/confirm-pay-on-delivery', [OrderController::class, 'confirmPayOnDelivery']);
     Route::get('/orders', [OrderController::class, 'index']);
 
 
