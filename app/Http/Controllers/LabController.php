@@ -51,8 +51,7 @@ class LabController extends Controller
      */
     public function store(Request $request)
     {
-        \Log::info('Store method triggered', $request->all());
-        dd('Reached controller');
+        
 
         $request->validate([
             'name' => 'required|string',
