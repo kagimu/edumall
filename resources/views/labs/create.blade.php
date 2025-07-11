@@ -5,7 +5,7 @@
 
 <!-- End Row-->
 
-<div class="col-lg-12">>
+<div class="col-lg-12">
     <div class="card">
         <div class="card-header">
             <h4 class="card-title">Add Product</h4>

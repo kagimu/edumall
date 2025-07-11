@@ -62,6 +62,8 @@ class LabController extends Controller
             'price' => 'required|string',
             'unit' => 'nullable|string',
             'desc' => 'nullable|string',
+            'purchaseType' => 'nullable|string',
+
         ]);
 
         $lab = new Lab();
@@ -91,10 +93,8 @@ class LabController extends Controller
 
         $lab->save();
 
-        return response()->json([
-            'message' => 'Lab created successfully.',
-            'data' => $lab
-        ], 201);
+        return redirect()->route('index.labs')->with('status', 'Lab created successfully.');
+
 
     }
 
