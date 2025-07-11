@@ -26,6 +26,7 @@ class AdminSeeder extends Seeder
         $admin->password = Hash::make("12345");
         $admin->position = 'Senior Developer';
         $admin->role = "admin";
+        $admin->userType = "admin";
         $admin->save();
 
         $admin2 = User::where('email','joseprincempoza@gmail.com ')->first();
@@ -38,6 +39,7 @@ class AdminSeeder extends Seeder
         $admin2->password = Hash::make("12345");
         $admin2->role = "admin";
         $admin2->position = "administrator";
+        $admin2->userType = "admin";
         $admin2->save();
 
         $admin3 = User::where('email','mugishad43@gmail.com ')->first();
@@ -50,6 +52,7 @@ class AdminSeeder extends Seeder
         $admin3->password = Hash::make("12345");
         $admin3->role = "admin";
         $admin3->position = "administrator";
+        $admin3->userType = "admin";
         $admin3->save();
     }
 }
