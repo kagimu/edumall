@@ -74,12 +74,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/libraries/{library}', [LibraryController::class, 'update'])->name('update.libraries');
     Route::delete('/libraries/{library}', [LibraryController::class, 'destroy'])->name('destroy.libraries');
 
-    Route::get('/Labs', [LabController::class, 'index'])->name('index.labs');
-    Route::get('/Labs/create', [LabController::class, 'create'])->name('create.labs');
-    Route::post('/Labs/store', [LabController::class, 'store'])->name('store.labs');
-    Route::get('/Labs/{lab}/edit', [LabController::class, 'edit'])->name('edit.labs');
-    Route::put('/Labs/{lab}', [LabController::class, 'update'])->name('update.labs');
-    Route::delete('/Labs/{lab}', [LabController::class, 'destroy'])->name('destroy.labs');
+    Route::get('/labs', [LabController::class, 'index'])->name('index.labs');
+    Route::get('/labs/create', [LabController::class, 'create'])->name('create.labs');
+    Route::post('/labs/store', [LabController::class, 'store'])->name('store.labs');
+    Route::get('/labs/{lab}/edit', [LabController::class, 'edit'])->name('edit.labs');
+    Route::put('/labs/{lab}', [LabController::class, 'update'])->name('update.labs');
+    Route::delete('/labs/{lab}', [LabController::class, 'destroy'])->name('destroy.labs');
 
     Route::get('/computerLabs', [ComputerLabController::class, 'index'])->name('index.computerLabs');
     Route::get('/computerLabs/create', [ComputerLabController::class, 'create'])->name('create.computerLabs');
