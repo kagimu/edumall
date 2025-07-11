@@ -31,7 +31,7 @@
 
                 <div class="form-group">
                     <label for="desc" class="form-label">Description:</label>
-                    <textarea name="desc" rows="4" cols="30" class="form-control tinymce-editor" required></textarea>
+                    <textarea name="desc" rows="4" cols="30" class="form-control tinymce-editor"></textarea>
                     @error('desc')
                     <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
                     @enderror
@@ -105,7 +105,7 @@
                         <option value="new">New</option>
                         <option value="old">Old</option>
                     </select>
-                    @error('category')
+                    @error('condition')
                     <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
                     @enderror
                 </div>

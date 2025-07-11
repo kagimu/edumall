@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 class LabController extends Controller
 {
+
+    
     /**
      * Display a listing of the resource.
      */
@@ -49,6 +51,9 @@ class LabController extends Controller
      */
     public function store(Request $request)
     {
+        \Log::info('Store method triggered', $request->all());
+        dd('Reached controller');
+
         $request->validate([
             'name' => 'required|string',
             'category' => 'required|in:apparatus,specimen,chemical',
