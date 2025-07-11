@@ -18,12 +18,13 @@ return new class extends Migration
             $table->string('avatar')->nullable(); // Main product image
             $table->json('images')->nullable(); // Other product images
             $table->string('color')->nullable(); // Product color
-            $table->string('brand')->nullable(); // Product brand
+            $table->string('rating')->nullable(); // Product brand
             $table->string('in_stock')->nullable(); // Stock quantity
             $table->enum('condition', ['new', 'old'])->default('new'); // Condition
             $table->string('price'); // Product price
-            $table->string('discount')->nullable(); // Discounted price
+            $table->string('unit')->nullable(); // Discounted price
             $table->text('desc')->nullable(); // Product description
+            $table->string('purchaseType')->nullable();
             $table->timestamps();
         });
     }

@@ -15,6 +15,7 @@ use App\Http\Controllers\ComputerLabController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
 
 
 // Public login routes (no middleware)
