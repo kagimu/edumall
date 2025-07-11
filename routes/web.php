@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\Auth;
 
 
 
+// Root redirect
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 Route::get('/dashboard', function () {
     return redirect()->route('login');
 });
