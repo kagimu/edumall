@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Services\WhatsAppService;
+
 
 class OrderController extends Controller
 {
@@ -36,10 +38,9 @@ class OrderController extends Controller
         }
 
         $validated = $request->validate([
-            'customer' => 'required|array',
-            'customer.name' => 'required|string',
-            'customer.email' => 'required|email',
-            'customer.phone' => 'required|string',
+            'customer_name' => 'required|string',
+            'customer_email' => 'required|email',
+            'customer_phone' => 'required|string',
             'address' => 'required|array',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|integer',
@@ -54,9 +55,9 @@ class OrderController extends Controller
 
         $order = new Order();
         $order->user_id = $user->id;
-        $order->customer_name = $validated['customer']['name'];
-        $order->customer_email = $validated['customer']['email'];
-        $order->customer_phone = $validated['customer']['phone'];
+        $order->customer_name = $validated['customer_name'];
+        $order->customer_email = $validated['customer_email'];
+        $order->customer_phone = $validated['customer_phone'];
         $order->delivery_info = json_encode($validated['address']);
         $order->subtotal = $validated['subtotal'];
         $order->delivery_fee = $validated['delivery_fee'];
@@ -65,6 +66,8 @@ class OrderController extends Controller
         $order->payment_status = $validated['payment_status'];
         $order->save();
 
+
+
         foreach ($validated['items'] as $item) {
             $order->items()->create([
                 'product_id' => $item['product_id'],
@@ -72,6 +75,36 @@ class OrderController extends Controller
                 'price' => $item['price'],
             ]);
         }
+
+        // Format order details for WhatsApp
+            $delivery = json_decode($order->delivery_info, true);
+            $location = $delivery['address'] ?? 'N/A';
+            $coords = $delivery['coordinates'] ?? ['lat' => 'N/A', 'lng' => 'N/A'];
+
+            $message = "🛒 *NEW ORDER RECEIVED*\n"
+                . "*Name:* {$order->customer_name}\n"
+                . "*Phone:* {$order->customer_phone}\n"
+                . "*Email:* {$order->customer_email}\n"
+                . "*Location:* $location\n"
+                . "*Coords:* {$coords['lat']}, {$coords['lng']}\n"
+                . "*Total:* UGX " . number_format($order->total) . "\n"
+                . "*Order ID:* #{$order->id}\n\n"
+                . "*Items:*\n";
+
+            // Append item details
+            foreach ($order->items as $item) {
+                $product = $item->product; // assuming relationship exists
+                $message .= "- {$product->name} (x{$item->quantity}) - UGX " . number_format($item->price) . "\n";
+            }
+
+            // Send to multiple WhatsApp numbers
+            $numbers = explode(',', env('ADMIN_WHATSAPP_NUMBERS')); // comma-separated list in .env
+
+            foreach ($numbers as $number) {
+                (new \App\Services\WhatsAppService())->sendMessage(trim($number), $message);
+            }
+
+
 
         return response()->json([
             'message' => 'Order placed successfully',
