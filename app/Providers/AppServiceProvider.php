@@ -24,10 +24,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Schema::defaultStringLength(191);
+         Schema::defaultStringLength(191);
+
         if (env('APP_ENV') === 'production') {
-        URL::forceScheme('https');
-    }
+            URL::forceScheme('https');
+        }
+
+        // Automatically run "storage:link" if the link doesn't exist
+        if (!File::exists(public_path('storage'))) {
+            Artisan::call('storage:link');
+        }
         
     }
 }
