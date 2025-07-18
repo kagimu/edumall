@@ -25,7 +25,12 @@ class OrderController extends Controller
 
     public function store(Request $request)
     {
-        $user = auth()->user();
+       $user = auth()->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
 
         $pendingOrder = Order::where('user_id', $user->id)
             ->where('payment_status', 'pending')

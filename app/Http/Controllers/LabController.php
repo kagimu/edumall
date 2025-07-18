@@ -97,8 +97,14 @@ class LabController extends Controller
 
         $lab->save();
 
-        return redirect()->route('index.labs')->with('status', 'Lab created successfully.');
+      if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Lab created successfully.',
+                'data' => $lab
+            ], 201);
+        }
 
+        return redirect()->route('labs.index')->with('status', 'Lab created successfully.');
 
     }
 
