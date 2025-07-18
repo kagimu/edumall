@@ -134,7 +134,7 @@ class LabController extends Controller
             'category' => 'required|in:apparatus,specimen,chemical',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB for each image
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB each
             'color' => 'nullable|string',
             'rating' => 'nullable|string',
             'in_stock' => 'nullable|string',
@@ -159,24 +159,20 @@ class LabController extends Controller
 
         // Handle avatar update
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
             if ($lab->avatar) {
                 \Storage::delete('public/' . $lab->avatar);
             }
-
             $avatarPath = $request->file('avatar')->store('images/labs', 'public');
             $lab->avatar = $avatarPath;
         }
 
         // Handle images update
         if ($request->hasFile('images')) {
-            // Delete old images if exist
             if ($lab->images) {
                 foreach (json_decode($lab->images) as $oldImage) {
                     \Storage::delete('public/' . $oldImage);
                 }
             }
-
             $imagePath = [];
             foreach ($request->file('images') as $image) {
                 $imagePath[] = $image->store('images/labs', 'public');
@@ -186,7 +182,6 @@ class LabController extends Controller
 
         $lab->save();
 
-        // API or Web Response
         if ($request->wantsJson()) {
             return response()->json([
                 'message' => 'Lab updated successfully.',
@@ -196,6 +191,7 @@ class LabController extends Controller
 
         return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
     }
+
 
 
     /**
