@@ -247,8 +247,12 @@
                                     <div class="dropdown profile-dropdown">
                                         <a href="#" class="nav-link pr-0 leading-none" data-toggle="dropdown">
                                             <span>
-                                                <img src="{{ Auth::user()->image ? asset(Auth::user()->image) : asset('images/placeholder.png') }}"
-                                                    alt="img" style="height: 60px; width:60px;">
+                                                @if(Auth::check() && Auth::user()->image)
+                                                    <img src="{{ asset(Auth::user()->image) }}" alt="img" style="height: 60px; width:60px;">
+                                                @else
+                                                    <img src="{{ asset('images/placeholder.png') }}" alt="img" style="height: 60px; width:60px;">
+                                                @endif
+
                                                 <img src="https://i.imghippo.com/files/R3552HkQ.png"
                                                     class="avatar avatar-sm brround" style="height: 60px; width:60px;">
                                             </span>
