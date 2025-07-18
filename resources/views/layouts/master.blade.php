@@ -258,11 +258,14 @@
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow animated">
                                             <div class="text-center">
-                                                <a href="#"
-                                                    class="dropdown-item text-center user pb-0 font-weight-bold">{{Auth::user()->first_name
-                                                    . " " .Auth::user()->last_name}}</a>
-                                                <span class="text-center user-semi-title">System Administrator</span>
-                                                <div class="dropdown-divider"></div>
+                                               @if(Auth::check())
+                                                    <a href="#"
+                                                    class="dropdown-item text-center user pb-0 font-weight-bold">
+                                                    {{ Auth::user()->first_name . " " . Auth::user()->last_name }}
+                                                    </a>
+                                                    <span class="text-center user-semi-title">System Administrator</span>
+                                                    <div class="dropdown-divider"></div>
+                                                @endif
                                             </div>
                                             {{--<a class="dropdown-item d-flex" href="#">--}}
                                                 {{--<svg class="header-icon mr-3" x="1008" y="1248" viewBox="0 0 24 24"
