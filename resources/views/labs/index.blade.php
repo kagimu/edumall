@@ -57,6 +57,9 @@
                                 </td>
                                 <td>{{$opportunity->created_at}}</td>
                                 <td>
+                                         <a href="{{ route('edit.labs', $opportunity->id) }}" class="btn btn-primary mb-1">
+                                                Edit
+                                         </a>
                                         <form action="{{ route('destroy.labs', $opportunity->id) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')

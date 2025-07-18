@@ -136,37 +136,49 @@ class LabController extends Controller
             'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB for each image
             'color' => 'nullable|string',
-            'brand' => 'nullable|string',
-            'in_stock' => 'nullable|integer',
+            'rating' => 'nullable|string',
+            'in_stock' => 'nullable|string',
             'condition' => 'required|in:new,old',
-            'price' => 'required|numeric',
-            'discount' => 'nullable|numeric',
+            'price' => 'required|string',
+            'unit' => 'nullable|string',
             'desc' => 'nullable|string',
+            'purchaseType' => 'nullable|string',
         ]);
 
+        // Update fields
         $lab->name = $request->name;
         $lab->category = $request->category;
+        $lab->purchaseType = $request->purchaseType;
         $lab->color = $request->color;
-        $lab->brand = $request->brand;
+        $lab->rating = $request->rating;
         $lab->in_stock = $request->in_stock;
         $lab->condition = $request->condition;
         $lab->price = $request->price;
-        $lab->discount = $request->discount;
+        $lab->unit = $request->unit;
         $lab->desc = $request->desc;
 
+        // Handle avatar update
         if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
             if ($lab->avatar) {
                 \Storage::delete('public/' . $lab->avatar);
             }
+
             $avatarPath = $request->file('avatar')->store('images/labs', 'public');
             $lab->avatar = $avatarPath;
         }
 
+        // Handle images update
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                if (isset($lab->images)) {
-                    \Storage::delete('public/' . json_decode($lab->images));
+            // Delete old images if exist
+            if ($lab->images) {
+                foreach (json_decode($lab->images) as $oldImage) {
+                    \Storage::delete('public/' . $oldImage);
                 }
+            }
+
+            $imagePath = [];
+            foreach ($request->file('images') as $image) {
                 $imagePath[] = $image->store('images/labs', 'public');
             }
             $lab->images = json_encode($imagePath);
@@ -174,8 +186,17 @@ class LabController extends Controller
 
         $lab->save();
 
-        return redirect()->route('labs.index')->with('success', 'Lab updated successfully.');
+        // API or Web Response
+        if ($request->wantsJson()) {
+            return response()->json([
+                'message' => 'Lab updated successfully.',
+                'data' => $lab
+            ], 200);
+        }
+
+        return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
     }
+
 
     /**
      * Remove the specified resource from storage.
