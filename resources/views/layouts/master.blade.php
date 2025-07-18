@@ -252,7 +252,6 @@
                                                 @else
                                                     <img src="{{ asset('images/placeholder.png') }}" alt="img" style="height: 60px; width:60px;">
                                                 @endif
-
                                                 <img src="https://i.imghippo.com/files/R3552HkQ.png"
                                                     class="avatar avatar-sm brround" style="height: 60px; width:60px;">
                                             </span>
@@ -260,7 +259,7 @@
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow animated">
                                             <div class="text-center">
                                                 <a href="#"
-                                                    class="dropdown-item text-center user pb-0 font-weight-bold">{{Auth::user()->name
+                                                    class="dropdown-item text-center user pb-0 font-weight-bold">{{Auth::user()->first_name
                                                     . " " .Auth::user()->last_name}}</a>
                                                 <span class="text-center user-semi-title">System Administrator</span>
                                                 <div class="dropdown-divider"></div>
