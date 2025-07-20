@@ -20,15 +20,6 @@ class LabController extends Controller
         return view('labs.create');
     }
 
-    public function getLab()
-    {
-        $labs = Lab::all();
-
-        return response()->json([
-            'message' => 'Labs retrieved successfully.',
-            'data' => $labs
-        ], 200);
-    }
 
     public function store(Request $request)
     {
@@ -64,13 +55,6 @@ class LabController extends Controller
         }
 
         $lab->save();
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Lab created successfully.',
-                'data' => $lab
-            ], 201);
-        }
 
         return redirect()->route('labs.index')->with('status', 'Lab created successfully.');
     }
@@ -127,13 +111,6 @@ class LabController extends Controller
         }
 
         $lab->save();
-
-        if ($request->wantsJson()) {
-            return response()->json([
-                'message' => 'Lab updated successfully.',
-                'data' => $lab
-            ], 200);
-        }
 
         return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
     }
