@@ -74,7 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/libraries/{library}', [LibraryController::class, 'update'])->name('update.libraries');
     Route::delete('/libraries/{library}', [LibraryController::class, 'destroy'])->name('destroy.libraries');
 
-    Route::get('/labs', [LabController::class, 'index'])->name('index.labs');
+   Route::get('/all-labs', [LabController::class, 'index'])->name('labs.index.');
     Route::get('/labs/create', [LabController::class, 'create'])->name('create.labs');
     Route::post('/labs/store', [LabController::class, 'store'])->name('store.labs');
     Route::get('/labs/{lab}/edit', [LabController::class, 'edit'])->name('edit.labs');

@@ -4,14 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Lab;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class LabController extends Controller
 {
-
-    
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         session(['title' => 'Laboratory Items']);
@@ -19,9 +15,6 @@ class LabController extends Controller
         return view('labs.index', compact('labs'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('labs.create');
@@ -31,34 +24,20 @@ class LabController extends Controller
     {
         $labs = Lab::all();
 
-        if ($labs->isEmpty()) {
-            return response()->json([
-                'message' => 'No labs found.',
-                'data' => []
-            ], 404);
-        }
-
         return response()->json([
             'message' => 'Labs retrieved successfully.',
             'data' => $labs
         ], 200);
     }
 
-   
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        
-
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string',
             'category' => 'required|in:apparatus,specimen,chemical',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
             'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB for each image
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240',
             'color' => 'nullable|string',
             'rating' => 'nullable|string',
             'in_stock' => 'nullable|string',
@@ -67,37 +46,26 @@ class LabController extends Controller
             'unit' => 'nullable|string',
             'desc' => 'nullable|string',
             'purchaseType' => 'nullable|string',
-
         ]);
 
-        $lab = new Lab();
-        $lab->name = $request->name;
-        $lab->category = $request->category;
-        $lab->purchaseType = $request->purchaseType;
-        $lab->category = $request->category;
-        $lab->color = $request->color;
-        $lab->rating = $request->rating;
-        $lab->in_stock = $request->in_stock;
-        $lab->condition = $request->condition;
-        $lab->price = $request->price;
-        $lab->unit = $request->unit;
-        $lab->desc = $request->desc;
+        $lab = new Lab($validated);
 
+        // Handle avatar upload
         if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('images/labs', 'public');
-            $lab->avatar = $avatarPath;
+            $lab->avatar = $request->file('avatar')->store('images/labs', 'public');
         }
 
+        // Handle multiple images
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagePath[] = $image->store('images/labs', 'public');
-            }
-            $lab->images = json_encode($imagePath);
+            $images = collect($request->file('images'))->map(function ($image) {
+                return $image->store('images/labs', 'public');
+            });
+            $lab->images = $images->toArray();
         }
 
         $lab->save();
 
-      if ($request->wantsJson()) {
+        if ($request->wantsJson()) {
             return response()->json([
                 'message' => 'Lab created successfully.',
                 'data' => $lab
@@ -105,36 +73,24 @@ class LabController extends Controller
         }
 
         return redirect()->route('labs.index')->with('status', 'Lab created successfully.');
-
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Lab $lab)
     {
         return view('labs.show', compact('lab'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Lab $lab)
     {
         return view('labs.edit', compact('lab'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Lab $lab)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string',
             'category' => 'required|in:apparatus,specimen,chemical',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB
-            'images' => 'nullable|array',
-            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:10240', // Max 10MB each
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
             'color' => 'nullable|string',
             'rating' => 'nullable|string',
             'in_stock' => 'nullable|string',
@@ -145,39 +101,29 @@ class LabController extends Controller
             'purchaseType' => 'nullable|string',
         ]);
 
-        // Update fields
-        $lab->name = $request->name;
-        $lab->category = $request->category;
-        $lab->purchaseType = $request->purchaseType;
-        $lab->color = $request->color;
-        $lab->rating = $request->rating;
-        $lab->in_stock = $request->in_stock;
-        $lab->condition = $request->condition;
-        $lab->price = $request->price;
-        $lab->unit = $request->unit;
-        $lab->desc = $request->desc;
+        $lab->fill($validated);
 
         // Handle avatar update
         if ($request->hasFile('avatar')) {
             if ($lab->avatar) {
-                \Storage::delete('public/' . $lab->avatar);
+                Storage::disk('public')->delete($lab->avatar);
             }
-            $avatarPath = $request->file('avatar')->store('images/labs', 'public');
-            $lab->avatar = $avatarPath;
+            $lab->avatar = $request->file('avatar')->store('images/labs', 'public');
         }
 
         // Handle images update
         if ($request->hasFile('images')) {
-            if ($lab->images) {
-                foreach (json_decode($lab->images) as $oldImage) {
-                    \Storage::delete('public/' . $oldImage);
+            if (!empty($lab->images)) {
+                foreach ($lab->images as $oldImage) {
+                    Storage::disk('public')->delete($oldImage);
                 }
             }
-            $imagePath = [];
-            foreach ($request->file('images') as $image) {
-                $imagePath[] = $image->store('images/labs', 'public');
-            }
-            $lab->images = json_encode($imagePath);
+
+            $images = collect($request->file('images'))->map(function ($image) {
+                return $image->store('images/labs', 'public');
+            });
+
+            $lab->images = $images->toArray();
         }
 
         $lab->save();
@@ -192,22 +138,15 @@ class LabController extends Controller
         return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
     }
 
-
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Lab $lab)
     {
-        // Delete the avatar image
         if ($lab->avatar) {
-            \Storage::delete('public/' . $lab->avatar);
+            Storage::disk('public')->delete($lab->avatar);
         }
 
-        // Delete the images
-        if (isset($lab->images)) {
-            foreach (json_decode($lab->images) as $image) {
-                \Storage::delete('public/' . $image);
+        if (!empty($lab->images)) {
+            foreach ($lab->images as $image) {
+                Storage::disk('public')->delete($image);
             }
         }
 

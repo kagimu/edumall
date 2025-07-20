@@ -10,7 +10,7 @@ use App\Http\Controllers\EventsController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\FurnitureController;
 use App\Http\Controllers\LibraryController;
-use App\Http\Controllers\LabController;
+use App\Http\Controllers\Api\LabApiController;
 use App\Http\Controllers\ComputerLabController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
@@ -51,8 +51,9 @@ Route::get('/events', [EventsController::class, 'getEvents']);
 Route::get('/holidays', [HolidayController::class, 'getHolidays']);
 Route::get('/furniture', [FurnitureController::class, 'getFurniture']);
 Route::get('/libraries', [LibraryController::class, 'getLibraries'])->name('api.libraries') ;
-Route::get('/labs', [LabController::class, 'getLab'])->name('api.labs.index');
+
+Route::get('/labs', [LabApiController::class, 'getLab']);
 Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
 
-Route::post('/labs', [LabController::class, 'store']);
-Route::apiResource('labs', LabController::class);
+Route::post('/labs', [LabApiController::class, 'store']);
+
