@@ -4,15 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Support\Facades\Storage;
 
 class Lab extends Model
 {
     use HasFactory;
+
     protected $table = 'labs';
-
-  
-
 
     protected $fillable = [
         'name',
@@ -30,33 +27,40 @@ class Lab extends Model
     ];
 
     protected $casts = [
-        'images' => 'array', // Casts the JSON field to an array
+        'images' => 'array',
     ];
-    protected $attributes = [
-        'images' => '[]', // Default value for images
-    ];
-    protected $appends = [ 'avatar_url', 'images_url'];
 
-    
-   
+    protected $attributes = [
+        'images' => '[]',
+    ];
+
+    protected $appends = [ 'avatar_url', 'images_url' ];
+
     public function getAvatarUrlAttribute()
     {
-        return url('storage/' . $this->avatar);
+        if (!$this->avatar) {
+            return null;
+        }
+
+        // If avatar is a full URL (e.g. Imgur), return it as is
+        if (filter_var($this->avatar, FILTER_VALIDATE_URL)) {
+            return $this->avatar;
+        }
+
+        return secure_asset('storage/' . $this->avatar);
     }
+
     public function getImagesUrlAttribute()
     {
         $images = $this->images;
 
-        // Force to array if stored as string accidentally
         if (is_string($images)) {
             $decoded = json_decode($images, true);
             $images = is_array($decoded) ? $decoded : [];
         }
 
         return array_map(function ($image) {
-            return url('storage/' . $image);
+            return secure_asset('storage/' . $image);
         }, $images ?? []);
     }
-
-
 }
