@@ -1,12 +1,15 @@
 <?php
 
 return [
-    'paths' => ['api/*', 'sanctum/csrf-cookie'], // Add your API and CSRF paths
-    'allowed_methods' => ['*'], // Allow all HTTP methods
-    'allowed_origins' => ['http://localhost:8080','https://edumall-admin.up.railway.app','https://edumall-uganda.netlify.app'], // Your frontend's origin
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'allowed_methods' => ['*'],
+    'allowed_origins' => [
+        'http://localhost:8080', // For Vite (optional if you're using it locally)
+        'https://edumall-uganda.netlify.app', // ✅ This is your Netlify frontend
+    ],
     'allowed_origins_patterns' => [],
-    'allowed_headers' => ['*'], // Allow all headers
+    'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
-    'supports_credentials' => true, // For cookies or authentication
+    'supports_credentials' => false, // ❗ Set to false if you don't use cookies or Laravel Sanctum
 ];
