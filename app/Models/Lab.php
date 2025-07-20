@@ -45,9 +45,18 @@ class Lab extends Model
     }
     public function getImagesUrlAttribute()
     {
+        $images = $this->images;
+
+        // Force to array if stored as string accidentally
+        if (is_string($images)) {
+            $decoded = json_decode($images, true);
+            $images = is_array($decoded) ? $decoded : [];
+        }
+
         return array_map(function ($image) {
             return url('storage/' . $image);
-        }, $this->images ?? []);
+        }, $images ?? []);
     }
+
 
 }
