@@ -52,7 +52,8 @@ Route::get('/holidays', [HolidayController::class, 'getHolidays']);
 Route::get('/furniture', [FurnitureController::class, 'getFurniture']);
 Route::get('/libraries', [LibraryController::class, 'getLibraries'])->name('api.libraries') ;
 
-Route::get('/labs', [LabApiController::class, 'getLab']);
+
+Route::get('/labs', [LabApiController::class, 'index']);
 Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
 
 Route::post('/labs', [LabApiController::class, 'store']);
