@@ -8,7 +8,7 @@
         <h4 class="page-title">{{session('title')}}</h4>
     </div>
     <div class="page-rightheader ml-auto d-lg-flex d-none">
-        <a class="btn btn-success" href="{{ route('create.labs') }}"> Add laboratory product</a>
+        <a class="btn btn-success" href="{{ route('labs.create') }}"> Add laboratory product</a>
 
     </div>
 </div>
@@ -57,10 +57,10 @@
                                 </td>
                                 <td>{{$opportunity->created_at}}</td>
                                 <td>
-                                         <a href="{{ route('edit.labs', $opportunity->id) }}" class="btn btn-primary mb-1">
+                                         <a href="{{ route('labs.edit', $opportunity->id) }}" class="btn btn-primary mb-1">
                                                 Edit
                                          </a>
-                                        <form action="{{ route('destroy.labs', $opportunity->id) }}" method="POST" style="display: inline;">
+                                        <form action="{{ route('labs.destroy', $opportunity->id) }}" method="POST" style="display: inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-light" onclick="return confirm('Are you sure you want to delete this blog?')">

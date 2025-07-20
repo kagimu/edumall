@@ -8,7 +8,7 @@
             <h4 class="card-title">Edit Product</h4>
         </div>
         <div class="pull-right mb-3">
-            <a class="btn btn-primary" href="{{ route('index.labs') }}"> Back</a>
+            <a class="btn btn-primary" href="{{ route('labs.index') }}"> Back</a>
         </div>
         @if(session('status'))
         <div class="alert alert-success mb-1 mt-1">
@@ -16,7 +16,7 @@
         </div>
         @endif
         <div class="card-body">
-            <form action="{{ route('update.labs', $lab->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('labs.update', $lab->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
