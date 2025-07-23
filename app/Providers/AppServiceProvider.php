@@ -29,9 +29,9 @@ class AppServiceProvider extends ServiceProvider
     {
          Schema::defaultStringLength(191);
 
-        if (env('APP_ENV') === 'production') {
-            URL::forceScheme('https');
-       }
+       // if (env('APP_ENV') === 'production') {
+       //     URL::forceScheme('https');
+       //}
 
         // Automatically run "storage:link" if the link doesn't exist
         if (!File::exists(public_path('storage'))) {
