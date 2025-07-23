@@ -6,6 +6,7 @@ return [
     'allowed_origins' => [
         'http://localhost:8080', // For Vite (optional if you're using it locally)
         'https://edumall-uganda.netlify.app', // ✅ This is your Netlify frontend
+        'https://edumall-admin.up.railway.app', // ✅ This is your Railway backend
         
     ],  
     'allowed_origins_patterns' => [],
