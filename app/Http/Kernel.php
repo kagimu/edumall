@@ -23,7 +23,7 @@ class Kernel extends HttpKernel
         // Validate post size
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
 
-          \Illuminate\Http\Middleware\HandleCors::class,
+          
 
         // Trim and normalize strings
         \App\Http\Middleware\TrimStrings::class,
@@ -51,6 +51,7 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
              //\App\Http\Middleware\OwnCors::class,
+             \App\Http\Middleware\Cors::class,
         ],
 
     ];
