@@ -3,11 +3,14 @@
 return [
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    'allowed_origins' => ['*'], // ❗ Use '*' for development, specify domains in production
+    'allowed_origins' => [
+        'http://192.168.147.241:8080',
+        'http://localhost:8080', // For Vite (optional if you're using it locally)
+        'https://edumall-uganda.netlify.app', // ✅ This is your Netlify frontend
+    ],
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
-    'supports_credentials' => false, // ❗ Set to false if you don't use cookies or Laravel Sanctum
+    'supports_credentials' => true, // ❗ Set to false if you don't use cookies or Laravel Sanctum
 ];
-    
