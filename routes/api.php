@@ -23,7 +23,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Authenticated routes
-Route::group(['middlware' => ['api'], 'prefix' => 'auth'],function ($router) {
+Route::middleware('auth:sanctum')->group(function () {
     Route::get('/cart/all', [CartController::class, 'allCarts']);
     Route::get('/cart', [CartController::class, 'view']);               // ✅ Fetch cart
     Route::post('/cart/add', [CartController::class, 'add']);           // ✅ Add to cart
