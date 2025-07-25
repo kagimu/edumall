@@ -9,7 +9,7 @@ return [
         'https://edumall-uganda.netlify.app', // ✅ This is your Netlify frontend
     ],
     'allowed_origins_patterns' => [
-        '/^https?:\/\/([a-z0-9-]+\.)?annaponsprojects\.com$/',
+        '/^https?:\/\/([a-z0-9-]+\.)?edumall-uganda\.app$/',
     ],
     'allowed_headers'   => ['*'],
     'exposed_headers'   => [],
