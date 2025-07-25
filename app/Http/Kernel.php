@@ -16,13 +16,14 @@ class Kernel extends HttpKernel
     protected $middleware = [
         // Trust proxies
         \App\Http\Middleware\TrustProxies::class,
+         //\App\Http\Middleware\OwnCors::class,
         // Handle maintenance mode
         \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
 
         // Validate post size
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-        \App\Http\Middleware\CorsMiddleware::class,
-          
+
+          \Illuminate\Http\Middleware\HandleCors::class,
 
         // Trim and normalize strings
         \App\Http\Middleware\TrimStrings::class,
@@ -48,6 +49,7 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+             //\App\Http\Middleware\OwnCors::class,
         ],
 
     ];

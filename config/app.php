@@ -215,5 +215,4 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         'Location' => 'Stevebauman\Location\Facades\Location',
     ])->toArray(),
-
 ];
