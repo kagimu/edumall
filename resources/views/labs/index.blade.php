@@ -51,8 +51,8 @@
                                 <td>UGX {{$opportunity->price}}</td>
                                 <td>{{$opportunity->date}}</td>
                                 <td>
-                                @if(!empty($opportunity->avatar_url))
-                                    <img src="{{ $opportunity->avatar_url }}" alt="Image" width="200" height="200">
+                                @if(!empty($opportunity->avatar))
+                                    <img src="{{ $opportunity->avatar }}" alt="Image" width="200" height="200">
                                 @endif
 
                                 </td>
