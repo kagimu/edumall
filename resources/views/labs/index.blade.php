@@ -52,7 +52,9 @@
                                 <td>{{$opportunity->date}}</td>
                                 <td>
                                 @if(!empty($opportunity->avatar))
-                                    <img src="{{ $opportunity->avatar }}" alt="Image" width="200" height="200">
+                                    <img src="{{ asset('storage/' . $opportunity->avatar) }}" alt="Image" width="200" height="200">
+
+
                                 @endif
 
                                 </td>

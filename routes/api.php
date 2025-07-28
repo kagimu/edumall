@@ -53,8 +53,11 @@ Route::get('/furniture', [FurnitureController::class, 'getFurniture']);
 Route::get('/libraries', [LibraryController::class, 'getLibraries'])->name('api.libraries') ;
 
 
-Route::get('/labs', [LabApiController::class, 'index']);
-Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
+// Lab routes protected by auth middleware
+Route::prefix('labs')->group(function () {
+    Route::get('/', [LabApiController::class, 'index']);
+    Route::post('/', [LabApiController::class, 'store']);
+});
 
-Route::post('/labs', [LabApiController::class, 'store']);
+Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
 

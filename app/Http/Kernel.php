@@ -14,14 +14,18 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $middleware = [
-    
+        // Trust proxies first
+        \App\Http\Middleware\TrustProxies::class,
+
+        // Handle CORS before other middleware
+        \Illuminate\Http\Middleware\HandleCors::class,
+        \App\Http\Middleware\Cors::class,
+
         // Handle maintenance mode
         \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
 
         // Validate post size
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
-
-          \Illuminate\Http\Middleware\HandleCors::class,
 
         // Trim and normalize strings
         \App\Http\Middleware\TrimStrings::class,
@@ -38,9 +42,11 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
+            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\Cors::class,
         ],
 
         'api' => [
@@ -61,6 +67,7 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
+        'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,

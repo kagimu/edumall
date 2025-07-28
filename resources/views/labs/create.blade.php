@@ -13,10 +13,26 @@
         <div class="pull-right">
             <a class="btn btn-primary" href="{{ route('labs.index') }}"> Back</a>
         </div>
-        @if(session('status'))
-        <div class="alert alert-success mb-1 mt-1">
-            {{ session('status') }}
-        </div>
+        @if(session('success'))
+            <div class="alert alert-success mb-1 mt-1">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger mb-1 mt-1">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger mb-1 mt-1">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
         @endif
         <div class="card-body">
             <form action="{{ route('labs.store') }}" method="POST" enctype="multipart/form-data">

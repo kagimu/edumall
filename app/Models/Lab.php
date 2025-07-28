@@ -47,7 +47,7 @@ class Lab extends Model
             return $this->avatar;
         }
 
-        return secure_asset('storage/' . $this->avatar);
+        return asset('storage/' . $this->avatar);
     }
 
     public function getImagesUrlAttribute()
@@ -60,7 +60,7 @@ class Lab extends Model
         }
 
         return array_map(function ($image) {
-            return secure_asset('storage/' . $image);
+            return asset('storage/' . $image);
         }, $images ?? []);
     }
 }
