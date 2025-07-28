@@ -19,7 +19,6 @@ class Kernel extends HttpKernel
 
         // Handle CORS before other middleware
         \Illuminate\Http\Middleware\HandleCors::class,
-        \App\Http\Middleware\Cors::class,
 
         // Handle maintenance mode
         \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
@@ -53,6 +52,7 @@ class Kernel extends HttpKernel
             \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\ForceJsonResponse::class,
         ],
 
     ];
