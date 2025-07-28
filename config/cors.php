@@ -20,16 +20,20 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'https://edumall-uganda.netlify.app',
+        'http://localhost:5173',  // For local development
+        'http://localhost:8080'   // For local development
+    ],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+    'exposed_headers' => ['*'],
 
     'max_age' => 44100,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
 
 ];

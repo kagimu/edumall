@@ -1,8 +1,8 @@
 <?php
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Response;
 
 use App\Http\Controllers\StationaryController;
 use App\Http\Controllers\SportsController;
@@ -53,11 +53,23 @@ Route::get('/furniture', [FurnitureController::class, 'getFurniture']);
 Route::get('/libraries', [LibraryController::class, 'getLibraries'])->name('api.libraries') ;
 
 
-// Lab routes protected by auth middleware
-Route::prefix('labs')->group(function () {
-    Route::get('/', [LabApiController::class, 'index']);
-    Route::post('/', [LabApiController::class, 'store']);
+// CORS preflight
+Route::options('labs', function() {
+    return Response::make('OK', 200)
+        ->header('Access-Control-Allow-Origin', 'https://edumall-uganda.netlify.app')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 });
 
-Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
+// Lab routes
+Route::prefix('labs')->group(function () {
+    Route::get('/', [LabApiController::class, 'index'])->middleware('cors');
+    Route::middleware(['auth:sanctum', 'cors'])->group(function () {
+        Route::post('/', [LabApiController::class, 'store']);
+    });
+});
+
+Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])
+    ->middleware('cors')
+    ->name('api.computer_lab');
 
