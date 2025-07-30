@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('firstName');
             $table->string('lastName');
-            $table->string('userType');
+            $table->string('userType')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->unique();
             $table->string('accountType')->default('individual'); // Default to 'individual'
@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('adminPhone')->nullable();
             $table->string('bankAccount')->nullable();
             $table->string('mobileMoneyNumber')->nullable();
-            $table->json('paymentMethods')->nullable(); // Store payment methods as JSON
+            $table->string('paymentMethods')->nullable(); // Store payment methods as JSON
             $table->string('role')->default('client'); // Default role
             $table->string('position')->nullable(); // Nullable position field
             $table->timestamp('email_verified_at')->nullable();

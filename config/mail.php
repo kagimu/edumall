@@ -34,6 +34,13 @@ return [
     |            "failover", "roundrobin"
     |
     */
+  'markdown' => [
+            'theme' => 'default',
+            'paths' => [
+                resource_path('views/vendor/mail'),
+            ],
+            'logo' => env('MAIL_LOGO', 'https://i.imgur.com/pVSiE9j.png'),
+        ],
 
     'mailers' => [
 

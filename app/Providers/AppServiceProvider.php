@@ -29,18 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
-        if (config('app.env') === 'production') {
-            URL::forceScheme('https');
 
-            // Trust the Railway.app load balancer
-            $this->app['request']->server->set('HTTPS', 'on');
-
-            // If you're behind a load balancer
-            if ($this->app->environment('production')) {
-                \Illuminate\Support\Facades\URL::forceScheme('https');
-                $this->app['request']->server->set('HTTPS', 'on');
-            }
-        }
 
         // Automatically run "storage:link" if the link doesn't exist
         if (!File::exists(public_path('storage'))) {

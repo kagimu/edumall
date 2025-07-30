@@ -18,7 +18,7 @@ class AuthController extends Controller
         //'password' => 'required|string|min:6|confirmed',
         'accountType' => 'required|in:individual,institution',
         'phone' => 'required|string|max:15',
-        
+
     ]);
 
     $user = User::create([
@@ -96,7 +96,7 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = Auth::user();
-        if ($user) {           
+        if ($user) {
             return response()->json([
                 'user' => $user,
             ], 200);
@@ -104,4 +104,18 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'No user is logged in.'], 401);
     }
+
+    /**
+ * Get all registered users (admin use).
+ */
+    public function getAllUsers()
+    {
+        $users = User::all();
+
+        return response()->json([
+            'message' => 'All users retrieved successfully.',
+            'users' => $users,
+        ], 200);
+    }
+
 }

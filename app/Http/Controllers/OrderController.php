@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Services\WhatsAppService;
+use App\Mail\OrderConfirmation;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 
 
 class OrderController extends Controller
@@ -81,6 +84,9 @@ class OrderController extends Controller
             ]);
         }
 
+        // Send order confirmation email
+        Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+
         // Format order details for WhatsApp
             $delivery = json_decode($order->delivery_info, true);
             $location = $delivery['address'] ?? 'N/A';
@@ -102,14 +108,15 @@ class OrderController extends Controller
                 $message .= "- {$product->name} (x{$item->quantity}) - UGX " . number_format($item->price) . "\n";
             }
 
-            // Send to multiple WhatsApp numbers
-            $numbers = explode(',', env('ADMIN_WHATSAPP_NUMBERS')); // comma-separated list in .env
+                  $adminPhones = explode(',', env('ADMIN_WHATSAPP_NUMBERS', ''));
 
-            foreach ($numbers as $number) {
-                (new \App\Services\WhatsAppService())->sendMessage(trim($number), $message);
+            foreach ($adminPhones as $phone) {
+                Http::post("https://api.ultramsg.com/" . env('ULTRAMSG_INSTANCE_ID') . "/messages/chat", [
+                    'token' => env('ULTRAMSG_TOKEN'),
+                    'to' => $phone,
+                    'body' => $message,
+                ]);
             }
-
-
 
         return response()->json([
             'message' => 'Order placed successfully',

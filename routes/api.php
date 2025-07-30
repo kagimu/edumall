@@ -21,6 +21,8 @@ use App\Http\Controllers\CheckoutController;
 // Public login routes (no middleware)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/users', [AuthController::class, 'getAllUsers']);
+
 
 // Authenticated routes
 Route::middleware('auth:sanctum')->group(function () {

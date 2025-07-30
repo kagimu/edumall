@@ -18,8 +18,8 @@ class OrderItem extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function product()
+   public function product()
     {
-        return $this->belongsTo(Lab::class);
+        return $this->belongsTo(Lab::class, 'product_id');
     }
 }
