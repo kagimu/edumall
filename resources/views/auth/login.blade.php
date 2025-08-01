@@ -5,28 +5,21 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>{{ config('app.name') }} | Login</title>
 
-    <!-- Favicon -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <link rel="icon" href="{{ asset('storage/logo/favicon.ico') }}" type="image/x-icon"/>
-
-    <!-- Bootstrap CSS -->
     <link href="{{ asset('assets/plugins/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet"/>
-
-    <!-- App CSS -->
     <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/css/dark.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/css/skins.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/css/animated.css') }}" rel="stylesheet"/>
-
-    <!-- Fonts and Icons -->
     <link href="{{ asset('assets/plugins/web-fonts/icons.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/plugins/web-fonts/font-awesome/font-awesome.min.css') }}" rel="stylesheet"/>
     <link href="{{ asset('assets/plugins/web-fonts/plugin.css') }}" rel="stylesheet"/>
 
-    <!-- Custom Styles -->
     <style>
         body {
-           background: url('https://i.imghippo.com/files/QaUM5275qQ.jpg') center center/cover no-repeat;
-            background-blur: 2px;
+            background: url('https://i.imghippo.com/files/QaUM5275qQ.jpg') center center/cover no-repeat;
             background-size: cover;
             background-attachment: fixed;
             color: black;
@@ -88,26 +81,19 @@
             </div>
         @endif
 
-        <form action="{{ route('login') }}" method="POST">
+        <form method="POST" action="{{ route('login') }}">
             @csrf
 
-            <!-- Email -->
             <div class="input-group mb-3">
-                <span class="input-group-text">
-                    <i class="fa fa-user"></i>
-                </span>
+                <span class="input-group-text"><i class="fa fa-user"></i></span>
                 <input type="email" name="email" class="form-control" placeholder="Email" required>
             </div>
 
-            <!-- Password -->
             <div class="input-group mb-4">
-                <span class="input-group-text">
-                    <i class="fa fa-lock"></i>
-                </span>
+                <span class="input-group-text"><i class="fa fa-lock"></i></span>
                 <input type="password" name="password" class="form-control" placeholder="Password" required>
             </div>
 
-            <!-- Submit Button -->
             <button type="submit" class="btn btn-primary">
                 Sign In <i class="fa fa-arrow-right ms-2"></i>
             </button>
@@ -115,7 +101,6 @@
     </div>
 </div>
 
-<!-- Scripts -->
 <script src="{{ asset('assets/js/vendors/jquery-3.5.1.min.js') }}"></script>
 <script src="{{ asset('assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 </body>
