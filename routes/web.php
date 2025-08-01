@@ -9,6 +9,7 @@
     use App\Http\Controllers\LibraryController;
     use App\Http\Controllers\LabController;
     use App\Http\Controllers\ComputerLabController;
+    use App\Http\Controllers\LoginController;
     use App\Http\Controllers\DashboardController;
     use App\Http\Controllers\OrderController;
     use App\Http\Controllers\CartController;
@@ -24,7 +25,7 @@
     });
 
 
-    use App\Http\Controllers\Auth\LoginController;
+
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
