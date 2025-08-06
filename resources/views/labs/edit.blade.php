@@ -16,13 +16,13 @@
         </div>
         @endif
         <div class="card-body">
-            <form action="{{ route('labs.update', $lab->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('labs.update', $lab->id)}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 
                 <div class="form-group">
                     <label for="name" class="form-label">Product Name:</label>
-                    <input type="text" name="name" class="form-control" 
+                    <input type="text" name="name" class="form-control"
                            value="{{ old('name', $lab->name) }}">
                     @error('name')
                     <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>

@@ -118,4 +118,11 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function getAllUsersTable()
+        {
+            $users = User::all();
+
+            return view('users.index', compact('users'));
+        }
+
 }

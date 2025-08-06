@@ -31,9 +31,6 @@ class AppServiceProvider extends ServiceProvider
 
 
 
-        // Automatically run "storage:link" if the link doesn't exist
-        if (!File::exists(public_path('storage'))) {
-            Artisan::call('storage:link');
-        }
+
     }
 }

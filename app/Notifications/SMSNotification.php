@@ -2,36 +2,47 @@
 
 namespace App\Notifications;
 
-use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Twilio\Rest\Client;
+use Illuminate\Support\Facades\Log;
+use App\Models\Order;
 
-class SMSNotification extends Notification
+class SMSNotification
 {
-    use Queueable;
+    protected $client;
 
-    protected $message;
-
-    public function __construct($message)
+    public function __construct()
     {
-        $this->message = $message;
+        // Using getenv() as Twilio recommends
+        $sid = getenv('TWILIO_SID');
+        $token = getenv('TWILIO_AUTH_TOKEN');
+
+        // Assign to class property, not local variable
+        $this->client = new Client($sid, $token);
     }
 
-    public function via($notifiable)
+    public function sendOrderMessage(Order $order)
     {
-        return ['sms'];
-    }
+        $delivery = json_decode($order->delivery_info, true);
 
-    public function toSms($notifiable)
-    {
-        $twilio = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
+        if (!$delivery) {
+            Log::error("Order #{$order->id} has no valid delivery info.");
+            return;
+        }
 
-        $twilio->messages->create(
-            $notifiable->phone_number, // Recipient's phone number
-            [
-                'from' => env('TWILIO_PHONE_NUMBER'), // Twilio number
-                'body' => $this->message, // Message content
-            ]
-        );
+        $body = "🛒 New Order Received! Order ID: #{$order->id} \n";
+        $to = '+256762833491'; // Hardcoded recipient
+
+        try {
+            $message = $this->client->messages->create(
+                $to,
+                [
+                    "messagingServiceSid" => "MG42ce7c4f1ef2a0d28e1cc7f5d6e358c6",
+                    'body' => $body,
+                ]
+            );
+            Log::info("Twilio SMS sent to $to. SID: " . $message->sid);
+        } catch (\Exception $e) {
+            Log::error("Failed to send SMS to $to: " . $e->getMessage());
+        }
     }
 }

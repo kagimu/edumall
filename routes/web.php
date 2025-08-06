@@ -18,18 +18,20 @@
 
 
 
+
     // Root redirect
     Route::get('/', function () {
         return redirect()->route('login');
     });
 
-    Route::get('/dashboard', function () {
-        return redirect()->route('login');
-    });
+
+
+
 
     Route::middleware('auth')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/orders', [OrderController::class, 'getAllOrders'])->name('orders.index');
         Route::get('/dashboard/orders', [OrderController::class, 'dashboard'])->name('dashboard.orders');
         Route::post('/orders/{order}/confirm-payment', [OrderController::class, 'confirmPayment'])->name('orders.confirmPayment');
         Route::get('/stationaries', [StationaryController::class, 'index'])->name('index.stationaries');
@@ -46,12 +48,7 @@
         Route::put('/sports/{sports}', [SportsController::class, 'update'])->name('update.sports');
         Route::delete('/sports/{sports}', [SportsController::class, 'destroy'])->name('destroy.sports');
 
-        Route::get('/events', [EventsController::class, 'index'])->name('index.events');
-        Route::get('/events/create', [EventsController::class, 'create'])->name('create.events');
-        Route::post('/events/store', [EventsController::class, 'store'])->name('store.events');
-        Route::get('/events/{events}/edit', [EventsController::class, 'edit'])->name('edit.events');
-        Route::put('/events/{events}', [EventsController::class, 'update'])->name('update.events');
-        Route::delete('/events/{events}', [EventsController::class, 'destroy'])->name('destroy.events');
+        Route::get('/users', [AuthController::class, 'getAllUsersTable'])->name('users.index');
 
         Route::get('/holidays', [HolidayController::class, 'index'])->name('index.holidays');
         Route::get('/holidays/create', [HolidayController::class, 'create'])->name('create.holidays');
@@ -93,4 +90,31 @@
 
     Auth::routes();
 
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    // Test route to bypass authentication
+    Route::get('/test-login', function () {
+        return response()->json(['message' => 'Test route working']);
+    });
+
+    // Custom login route for testing
+    Route::post('/custom-login', function (Request $request) {
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            return redirect()->intended('/dashboard');
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
+    });
+
+    // New API-based login page
+    Route::get('/api-login', function () {
+        return view('auth.api-login');
+    });
+
+    // Login success page
+    Route::get('/login-success', function () {
+        return view('auth.login-success');
+    });
+

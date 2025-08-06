@@ -9,17 +9,17 @@ use Laravel\Passport\Passport;
 class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
-        'App\Models\Model' => 'App\Policies\ModelPolicy',
+       // 'App\Models\Model' => 'App\Policies\ModelPolicy',
     ];
 
     /**
-     * we call the passport: routes 
+     * we call the passport: routes
      * to register routes that our application will use * to issue tokens and clients
      * @return void
      */
     public function boot()
     {
          $this->registerPolicies();
-        
+
     }
 }

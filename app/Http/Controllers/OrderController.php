@@ -4,27 +4,45 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Services\WhatsAppService;
 use App\Mail\OrderConfirmation;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Auth;
 
 
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
+            $user = $request->user();
 
-        $orders = Order::with('items')
-            ->where('user_id', $user->id)
-            ->orderByDesc('created_at')
-            ->get();
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Unauthorized access.'
+                ], 401);
+            }
 
-        return response()->json([
-            'orders' => $orders
-        ]);
+            $orders = Order::with('items.product')
+                ->where('user_id', $user->id)
+                ->orderByDesc('created_at')
+                ->get();
+
+
+            return response()->json([
+                'orders' => $orders,
+                'status' => 200,
+                'message' => 'Orders retrieved successfully'
+            ]);
     }
+
+    public function getAllOrders()
+        {
+            $orders = Order::with('items.product')
+                ->orderByDesc('created_at')
+                ->paginate(10);
+
+            return view('orders.index', compact('orders'));
+        }
 
     public function store(Request $request)
     {
@@ -32,17 +50,6 @@ class OrderController extends Controller
 
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
-
-
-        $pendingOrder = Order::where('user_id', $user->id)
-            ->where('payment_status', 'pending')
-            ->first();
-
-        if ($pendingOrder) {
-            return response()->json([
-                'message' => 'You have a pending order. Please complete payment before making a new one.',
-            ], 403);
         }
 
         $validated = $request->validate([
@@ -85,38 +92,24 @@ class OrderController extends Controller
         }
 
         // Send order confirmation email
-        Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+       try {
+            Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+        } catch (\Exception $e) {
+            \Log::error('Mail failed: ' . $e->getMessage());
+        }
 
-        // Format order details for WhatsApp
-            $delivery = json_decode($order->delivery_info, true);
-            $location = $delivery['address'] ?? 'N/A';
-            $coords = $delivery['coordinates'] ?? ['lat' => 'N/A', 'lng' => 'N/A'];
 
-            $message = "🛒 *NEW ORDER RECEIVED*\n"
-                . "*Name:* {$order->customer_name}\n"
-                . "*Phone:* {$order->customer_phone}\n"
-                . "*Email:* {$order->customer_email}\n"
-                . "*Location:* $location\n"
-                . "*Coords:* {$coords['lat']}, {$coords['lng']}\n"
-                . "*Total:* UGX " . number_format($order->total) . "\n"
-                . "*Order ID:* #{$order->id}\n\n"
-                . "*Items:*\n";
+        $order = Order::with('items', 'user')->find($order->id);
 
-            // Append item details
-            foreach ($order->items as $item) {
-                $product = $item->product; // assuming relationship exists
-                $message .= "- {$product->name} (x{$item->quantity}) - UGX " . number_format($item->price) . "\n";
-            }
 
-                  $adminPhones = explode(',', env('ADMIN_WHATSAPP_NUMBERS', ''));
+        try {
+           $sms = new \App\Notifications\SMSNotification();
+            $sms->sendOrderMessage($order);
 
-            foreach ($adminPhones as $phone) {
-                Http::post("https://api.ultramsg.com/" . env('ULTRAMSG_INSTANCE_ID') . "/messages/chat", [
-                    'token' => env('ULTRAMSG_TOKEN'),
-                    'to' => $phone,
-                    'body' => $message,
-                ]);
-            }
+        } catch (\Exception $e) {
+            \Log::error("Failed to send SMS for order #{$order->id}: " . $e->getMessage());
+        }
+
 
         return response()->json([
             'message' => 'Order placed successfully',

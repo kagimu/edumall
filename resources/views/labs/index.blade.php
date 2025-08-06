@@ -36,7 +36,6 @@
                                 <th class="wd-15p border-bottom-0">title</th>
                                 <th class="wd-15p border-bottom-0">category</th>
                                 <th class="wd-15p border-bottom-0">price</th>
-                                <th class="wd-15p border-bottom-0">Uploaded On</th>
                                 <th class="wd-15p border-bottom-0">cover image</th>
                                 <th class="wd-15p border-bottom-0">DATE</th>
                                 <th>Actions</th>
@@ -49,10 +48,9 @@
                                 <td>{{$opportunity->name}}</td>
                                 <td>{!! nl2br(wordwrap($opportunity->category, 20, "\n", true)) !!}</td>
                                 <td>UGX {{$opportunity->price}}</td>
-                                <td>{{$opportunity->date}}</td>
                                 <td>
                                 @if(!empty($opportunity->avatar))
-                                    <img src="{{ asset('storage/' . $opportunity->avatar) }}" alt="Image" width="200" height="200">
+                                    <img src="{{ asset('storage/' . $opportunity->avatar) }}" alt="Image" width="100" height="100">
 
 
                                 @endif

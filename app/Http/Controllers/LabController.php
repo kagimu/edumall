@@ -29,9 +29,9 @@ class LabController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string',
                 'category' => 'required|in:apparatus,specimen,chemical',
-                'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
-                'images' => 'nullable|array',
-                'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+                'avatar' => 'nullable|image|max:10240',
+                'images' => 'nullable|image|array',
+                'images.*' => 'nullable|image|max:10240',
                 'color' => 'nullable|string',
                 'rating' => 'nullable|string',
                 'in_stock' => 'nullable|string',
@@ -150,7 +150,7 @@ class LabController extends Controller
         $validated = $request->validate([
             'name' => 'required|string',
             'category' => 'required|in:apparatus,specimen,chemical',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
+            'avatar' => 'nullable|image|max:10240',
             'color' => 'nullable|string',
             'rating' => 'nullable|string',
             'in_stock' => 'nullable|string',
