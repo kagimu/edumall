@@ -119,12 +119,21 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="avatar_url">Or paste an online image URL:</label>
+                    <input type="url" name="avatar_url" class="form-control" value="{{ old('avatar_url', $lab->avatar) }}">
+                </div>
+
                 <div class="col-md-10">
                     <label for="images" class="form-label">Additional Images (replace if you want):</label>
                     <input type="file" name="images[]" id="images" class="form-control" multiple />
                     @error('images')
                     <div class="alert alert-danger mt-4 mb-1">{{ $message }}</div>
                     @enderror
+                </div>
+                <div class="form-group mt-3">
+                    <label for="images_url">Or enter image URLs (comma-separated):</label>
+                    <textarea name="images_url" class="form-control" rows="3">{{ old('images_url', isset($lab) ? implode(',', array_filter($lab->images ?? [], fn($img) => filter_var($img, FILTER_VALIDATE_URL))) : '') }}</textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary mt-5 mb-0">Update Product</button>

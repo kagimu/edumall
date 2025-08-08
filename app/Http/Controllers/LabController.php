@@ -30,8 +30,7 @@ class LabController extends Controller
                 'name' => 'required|string',
                 'category' => 'required|in:apparatus,specimen,chemical',
                 'avatar' => 'nullable|image|max:10240',
-                'images' => 'nullable|image|array',
-                'images.*' => 'nullable|image|max:10240',
+                'avatar_url' => 'nullable|url', // ✅ Add this
                 'color' => 'nullable|string',
                 'rating' => 'nullable|string',
                 'in_stock' => 'nullable|string',
@@ -44,9 +43,9 @@ class LabController extends Controller
                 'category.in' => 'The category must be either apparatus, specimen, or chemical.',
                 'condition.in' => 'The condition must be either new or old.',
                 'avatar.image' => 'The avatar must be an image file.',
-                'avatar.mimes' => 'The avatar must be a file of type: jpeg, png, jpg, gif.',
+                'avatar_url.url' => 'The avatar URL must be a valid URL.', // ✅
                 'images.*.image' => 'All uploaded images must be image files.',
-                'images.*.mimes' => 'All uploaded images must be of type: jpeg, png, jpg, gif.',
+                'images.*.mimes' => 'All uploaded images must be of type: jpeg, png, jpg, webp, gif.',
             ]);
 
             // Set default values
@@ -57,7 +56,13 @@ class LabController extends Controller
             $lab = new Lab();
             $lab->fill($validated);
 
-            // Handle avatar upload
+            // ✅ Use avatar_url if no file was uploaded
+            if (!$request->hasFile('avatar') && $request->filled('avatar_url')) {
+                $lab->avatar = $request->input('avatar_url');
+                \Log::info('Using external avatar URL: ' . $lab->avatar);
+            }
+
+            // ✅ Handle avatar file upload
             if ($request->hasFile('avatar')) {
                 try {
                     $avatarFile = $request->file('avatar');
@@ -84,12 +89,14 @@ class LabController extends Controller
                 }
             }
 
-            // Handle multiple images
-            if ($request->hasFile('images')) {
-                try {
-                    $uploadedImages = [];
+            // ✅ Handle multiple images
+           // ✅ Handle multiple images (uploaded + URLs)
+                $allImages = [];
+
+                // Handle uploaded image files
+                if ($request->hasFile('images')) {
                     foreach ($request->file('images') as $index => $image) {
-                        \Log::info('Processing image file:', [
+                        \Log::info('Processing uploaded image file:', [
                             'index' => $index,
                             'original_name' => $image->getClientOriginalName(),
                             'mime_type' => $image->getMimeType(),
@@ -97,23 +104,21 @@ class LabController extends Controller
                         ]);
 
                         $path = $image->store('images/labs', 'public');
-                        if (!$path) {
-                            throw new \Exception("Failed to store image at index {$index}");
+                        if ($path) {
+                            $allImages[] = $path;
                         }
-                        $uploadedImages[] = $path;
                     }
-
-                    $lab->images = $uploadedImages;
-                    \Log::info('All images uploaded successfully:', ['paths' => $uploadedImages]);
-                } catch (\Exception $e) {
-                    \Log::error('Multiple images upload error:', [
-                        'error' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]);
-                    throw new \Exception('Failed to upload one or more images: ' . $e->getMessage());
                 }
-            }
+
+                // Handle external image URLs
+                if ($request->filled('images_url')) {
+                    $urls = array_map('trim', explode(',', $request->input('images_url')));
+                    $validUrls = array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
+                    $allImages = array_merge($allImages, $validUrls);
+                }
+
+                $lab->images = $allImages;
+
 
             $lab->save();
             \Log::info('Lab item created successfully:', ['id' => $lab->id]);
@@ -135,6 +140,7 @@ class LabController extends Controller
         }
     }
 
+
     public function show(Lab $lab)
     {
         return view('labs.show', compact('lab'));
@@ -151,6 +157,7 @@ class LabController extends Controller
             'name' => 'required|string',
             'category' => 'required|in:apparatus,specimen,chemical',
             'avatar' => 'nullable|image|max:10240',
+            'avatar_url' => 'nullable|url', // ✅ Added validation for avatar_url
             'color' => 'nullable|string',
             'rating' => 'nullable|string',
             'in_stock' => 'nullable|string',
@@ -163,28 +170,59 @@ class LabController extends Controller
 
         $lab->fill($validated);
 
-        // Handle avatar update
-        if ($request->hasFile('avatar')) {
-            if ($lab->avatar) {
+        // ✅ Use avatar_url if no new file is uploaded
+        if (!$request->hasFile('avatar') && $request->filled('avatar_url')) {
+            // Delete old storage image if it exists and isn't a URL
+            if ($lab->avatar && !filter_var($lab->avatar, FILTER_VALIDATE_URL)) {
                 Storage::disk('public')->delete($lab->avatar);
             }
-            $lab->avatar = $request->file('avatar')->store('images/labs', 'public');
+            $lab->avatar = $request->input('avatar_url');
+            \Log::info('Updated using external avatar URL: ' . $lab->avatar);
         }
 
-        // Handle images update
-        if ($request->hasFile('images')) {
-            if (!empty($lab->images)) {
-                foreach ($lab->images as $oldImage) {
+        // ✅ Handle new avatar file upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if stored in storage
+            if ($lab->avatar && !filter_var($lab->avatar, FILTER_VALIDATE_URL)) {
+                Storage::disk('public')->delete($lab->avatar);
+            }
+
+            $path = $request->file('avatar')->store('images/labs', 'public');
+            $lab->avatar = $path;
+        }
+
+        // ✅ Handle multiple images update
+       // ✅ Handle multiple images (uploaded + URLs) on update
+        $allImages = [];
+
+        // Delete old images (only local ones)
+        if (!empty($lab->images)) {
+            foreach ($lab->images as $oldImage) {
+                if (!filter_var($oldImage, FILTER_VALIDATE_URL)) {
                     Storage::disk('public')->delete($oldImage);
                 }
             }
-
-            $images = collect($request->file('images'))->map(function ($image) {
-                return $image->store('images/labs', 'public');
-            });
-
-            $lab->images = $images->toArray();
         }
+
+        // Handle uploaded image files
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('images/labs', 'public');
+                if ($path) {
+                    $allImages[] = $path;
+                }
+            }
+        }
+
+        // Handle external image URLs
+        if ($request->filled('images_url')) {
+            $urls = array_map('trim', explode(',', $request->input('images_url')));
+            $validUrls = array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
+            $allImages = array_merge($allImages, $validUrls);
+        }
+
+        $lab->images = $allImages;
+
 
         $lab->save();
 

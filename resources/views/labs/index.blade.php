@@ -2,6 +2,7 @@
 
 @section('content')
 
+
 <!--Page header-->
 <div class="page-header">
     <div class="page-leftheader">
@@ -49,13 +50,22 @@
                                 <td>{!! nl2br(wordwrap($opportunity->category, 20, "\n", true)) !!}</td>
                                 <td>UGX {{$opportunity->price}}</td>
                                 <td>
-                                @if(!empty($opportunity->avatar))
-                                    <img src="{{ asset('storage/' . $opportunity->avatar) }}" alt="Image" width="100" height="100">
+                                                                @php
+                                    $avatar = $opportunity->avatar;
+                                    $isExternal = filter_var($avatar, FILTER_VALIDATE_URL);
+                                    $imageSrc = $isExternal
+                                        ? $avatar
+                                        : asset('storage/' .($avatar));
+                                @endphp
 
-
+                                @if(!empty($avatar))
+                                    <img src="{{ $imageSrc }}" alt="Avatar" width="100" height="100">
+                                @else
+                                    No image available
                                 @endif
 
                                 </td>
+
                                 <td>{{$opportunity->created_at}}</td>
                                 <td>
                                          <a href="{{ route('labs.edit', $opportunity->id) }}" class="btn btn-primary mb-1">

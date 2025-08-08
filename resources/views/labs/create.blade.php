@@ -134,6 +134,12 @@
                     @enderror
                 </div>
 
+                <div class="form-group">
+                    <label for="avatar_url">Or paste an online image URL:</label>
+                    <input type="url" name="avatar_url" class="form-control" placeholder="https://example.com/image.jpg">
+                </div>
+
+
                 <div class="col-md-10">
                     <label for="images" class="form-label">Upload Additional Images:</label>
                     <input type="file" name="images[]" id="images" class="form-control" multiple />
@@ -142,6 +148,9 @@
                     @enderror
                 </div>
 
+                <div class="form-group mt-3">
+                    <label for="images_url">Or enter image URLs (comma-separated):</label>
+                    <textarea name="images_url" class="form-control" rows="3" placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"></textarea>
 
                 <button type="submit" class="btn btn-primary mt-5 mb-0">Upload Product</button>
 
