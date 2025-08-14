@@ -50,17 +50,25 @@ class Lab extends Model
         return asset('storage/' . $this->avatar);
     }
 
-    public function getImagesUrlAttribute()
-    {
-        $images = $this->images;
+   public function getImagesUrlAttribute()
+{
+    $images = $this->images;
 
-        if (is_string($images)) {
-            $decoded = json_decode($images, true);
-            $images = is_array($decoded) ? $decoded : [];
+    // Handle case where images might be stored as JSON string
+    if (is_string($images)) {
+        $decoded = json_decode($images, true);
+        $images = is_array($decoded) ? $decoded : [];
+    }
+
+    return array_map(function ($image) {
+        // If the image path is a full URL, return it directly
+        if (filter_var($image, FILTER_VALIDATE_URL)) {
+            return $image;
         }
 
-        return array_map(function ($image) {
-            return asset('storage/' . $image);
-        }, $images ?? []);
-    }
+        // Otherwise, build the storage asset URL
+        return asset('storage/' . $image);
+    }, $images ?? []);
+}
+
 }
