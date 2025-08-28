@@ -14,6 +14,7 @@ class Lab extends Model
     protected $fillable = [
         'name',
         'category',
+        'subcategory',
         'avatar',
         'images',
         'color',

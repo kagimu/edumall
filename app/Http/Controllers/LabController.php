@@ -8,29 +8,43 @@ use Illuminate\Support\Facades\Storage;
 
 class LabController extends Controller
 {
+    // Define subcategories per category
+    private $subcategories = [
+        'laboratory' => ['apparatus', 'specimen', 'chemical'],
+        'textbooks' => ['textbook', 'revision guide', 'novel'],
+        'stationery' => ['scholastic', 'paper'],
+        'school_accessories' => ['accessories', 'schoolwear'],
+        'boardingSchool' => ['dormitory', 'toiletries'],
+        'sports' => ['equipment', 'wear'],
+        'food' => ['snacks', 'beverages'],
+        'technology' => ['devices', 'accessories'],
+        'furniture' => ['chairs', 'tables', 'storage'],
+        'health' => ['hygieneTools ', 'firstaid']
+    ];
+
     public function index()
     {
-        session(['title' => 'Laboratory Items']);
+        session(['title' => 'Products']);
         $labs = Lab::all();
         return view('labs.index', compact('labs'));
     }
 
     public function create()
     {
-        return view('labs.create');
+        return view('labs.create', ['subcategories' => $this->subcategories]);
     }
 
-
-    public function store(Request $request)
+   public function store(Request $request)
     {
         try {
-            \Log::info('Received lab creation request from web interface');
+            \Log::info('Received lab creation request');
 
-            $validated = $request->validate([
+            // Base validation rules
+            $rules = [
                 'name' => 'required|string',
-                'category' => 'required|in:apparatus,specimen,chemical',
+                'category' => 'required|in:laboratory,textbooks,stationery,school_accessories,boardingSchool,sports,food,health,furniture,technology',
                 'avatar' => 'nullable|image|max:10240',
-                'avatar_url' => 'nullable|url', // ✅ Add this
+                'avatar_url' => 'nullable|url',
                 'color' => 'nullable|string',
                 'rating' => 'nullable|string',
                 'in_stock' => 'nullable|string',
@@ -39,14 +53,17 @@ class LabController extends Controller
                 'unit' => 'nullable|string',
                 'desc' => 'nullable|string',
                 'purchaseType' => 'nullable|string',
-            ], [
-                'category.in' => 'The category must be either apparatus, specimen, or chemical.',
-                'condition.in' => 'The condition must be either new or old.',
-                'avatar.image' => 'The avatar must be an image file.',
-                'avatar_url.url' => 'The avatar URL must be a valid URL.', // ✅
-                'images.*.image' => 'All uploaded images must be image files.',
-                'images.*.mimes' => 'All uploaded images must be of type: jpeg, png, jpg, webp, gif.',
-            ]);
+            ];
+
+            // Dynamic subcategory validation
+            $category = $request->input('category');
+            if (isset($this->subcategories[$category])) {
+                $rules['subcategory'] = 'required|in:' . implode(',', $this->subcategories[$category]);
+            } else {
+                $rules['subcategory'] = 'nullable|string';
+            }
+
+            $validated = $request->validate($rules);
 
             // Set default values
             $validated['rating'] = $validated['rating'] ?? '0';
@@ -56,91 +73,46 @@ class LabController extends Controller
             $lab = new Lab();
             $lab->fill($validated);
 
-            // ✅ Use avatar_url if no file was uploaded
-            if (!$request->hasFile('avatar') && $request->filled('avatar_url')) {
-                $lab->avatar = $request->input('avatar_url');
-                \Log::info('Using external avatar URL: ' . $lab->avatar);
-            }
-
-            // ✅ Handle avatar file upload
+            // Handle avatar
             if ($request->hasFile('avatar')) {
-                try {
-                    $avatarFile = $request->file('avatar');
-                    \Log::info('Processing avatar file:', [
-                        'original_name' => $avatarFile->getClientOriginalName(),
-                        'mime_type' => $avatarFile->getMimeType(),
-                        'size' => $avatarFile->getSize()
-                    ]);
-
-                    $path = $avatarFile->store('images/labs', 'public');
-                    if (!$path) {
-                        throw new \Exception('Failed to store avatar file');
-                    }
-                    $lab->avatar = $path;
-
-                    \Log::info('Avatar uploaded successfully:', ['path' => $path]);
-                } catch (\Exception $e) {
-                    \Log::error('Avatar upload error:', [
-                        'error' => $e->getMessage(),
-                        'file' => $e->getFile(),
-                        'line' => $e->getLine()
-                    ]);
-                    throw new \Exception('Failed to upload avatar image: ' . $e->getMessage());
-                }
+                $lab->avatar = $request->file('avatar')->store('images/labs', 'public');
+            } elseif ($request->filled('avatar_url')) {
+                $lab->avatar = $request->input('avatar_url');
             }
 
-            // ✅ Handle multiple images
-           // ✅ Handle multiple images (uploaded + URLs)
-                $allImages = [];
-
-                // Handle uploaded image files
-                if ($request->hasFile('images')) {
-                    foreach ($request->file('images') as $index => $image) {
-                        \Log::info('Processing uploaded image file:', [
-                            'index' => $index,
-                            'original_name' => $image->getClientOriginalName(),
-                            'mime_type' => $image->getMimeType(),
-                            'size' => $image->getSize()
-                        ]);
-
-                        $path = $image->store('images/labs', 'public');
-                        if ($path) {
-                            $allImages[] = $path;
-                        }
-                    }
+            // Handle multiple images (uploaded + URLs)
+            $allImages = [];
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('images/labs', 'public');
+                    if ($path) $allImages[] = $path;
                 }
+            }
+            if ($request->filled('images_url')) {
+                $urls = array_map('trim', explode(',', $request->input('images_url')));
+                $allImages = array_merge($allImages, array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL)));
+            }
 
-                // Handle external image URLs
-                if ($request->filled('images_url')) {
-                    $urls = array_map('trim', explode(',', $request->input('images_url')));
-                    $validUrls = array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
-                    $allImages = array_merge($allImages, $validUrls);
-                }
-
-                $lab->images = $allImages;
-
-
+            $lab->images = $allImages;
             $lab->save();
-            \Log::info('Lab item created successfully:', ['id' => $lab->id]);
 
-            return redirect()->route('labs.index')
-                ->with('success', 'Laboratory item created successfully.');
+            return redirect()->route('labs.index')->with('success', 'Lab item created successfully.');
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Lab validation error: ' . json_encode($e->errors()));
-            return redirect()->back()
-                ->withErrors($e->errors())
-                ->withInput();
-
+            \Log::error('Validation error: ' . json_encode($e->errors()));
+            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             \Log::error('Lab creation error: ' . $e->getMessage());
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Error creating laboratory item: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Error creating lab item: ' . $e->getMessage());
         }
     }
 
-
+    /**
+     * Show the specified resource.
+     *
+     * @param  \App\Models\Lab  $lab
+     * @return \Illuminate\Http\Response
+     */
     public function show(Lab $lab)
     {
         return view('labs.show', compact('lab'));
@@ -148,85 +120,81 @@ class LabController extends Controller
 
     public function edit(Lab $lab)
     {
-        return view('labs.edit', compact('lab'));
+        return view('labs.edit', ['lab' => $lab, 'subcategories' => $this->subcategories]);
     }
 
     public function update(Request $request, Lab $lab)
     {
-        $validated = $request->validate([
-            'name' => 'required|string',
-            'category' => 'required|in:apparatus,specimen,chemical',
-            'avatar' => 'nullable|image|max:10240',
-            'avatar_url' => 'nullable|url', // ✅ Added validation for avatar_url
-            'color' => 'nullable|string',
-            'rating' => 'nullable|string',
-            'in_stock' => 'nullable|string',
-            'condition' => 'required|in:new,old',
-            'price' => 'required|string',
-            'unit' => 'nullable|string',
-            'desc' => 'nullable|string',
-            'purchaseType' => 'nullable|string',
-        ]);
+        try {
+            // Base validation rules
+            $rules = [
+                'name' => 'required|string',
+                'category' => 'required|in:laboratory,textbooks,stationery,school_accessories,boardingSchool,sports,food,health,furniture,technology',
+                'avatar' => 'nullable|image|max:10240',
+                'avatar_url' => 'nullable|url',
+                'color' => 'nullable|string',
+                'rating' => 'nullable|string',
+                'in_stock' => 'nullable|string',
+                'condition' => 'required|in:new,old',
+                'price' => 'required|string',
+                'unit' => 'nullable|string',
+                'desc' => 'nullable|string',
+                'purchaseType' => 'nullable|string',
+            ];
 
-        $lab->fill($validated);
-
-        // ✅ Use avatar_url if no new file is uploaded
-        if (!$request->hasFile('avatar') && $request->filled('avatar_url')) {
-            // Delete old storage image if it exists and isn't a URL
-            if ($lab->avatar && !filter_var($lab->avatar, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete($lab->avatar);
-            }
-            $lab->avatar = $request->input('avatar_url');
-            \Log::info('Updated using external avatar URL: ' . $lab->avatar);
-        }
-
-        // ✅ Handle new avatar file upload
-        if ($request->hasFile('avatar')) {
-            // Delete old avatar if stored in storage
-            if ($lab->avatar && !filter_var($lab->avatar, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete($lab->avatar);
+            // Dynamic subcategory validation
+            $category = $request->input('category');
+            if (isset($this->subcategories[$category])) {
+                $rules['subcategory'] = 'required|in:' . implode(',', $this->subcategories[$category]);
+            } else {
+                $rules['subcategory'] = 'nullable|string';
             }
 
-            $path = $request->file('avatar')->store('images/labs', 'public');
-            $lab->avatar = $path;
-        }
+            $validated = $request->validate($rules);
 
-        // ✅ Handle multiple images update
-       // ✅ Handle multiple images (uploaded + URLs) on update
-        $allImages = [];
+            // Set defaults if null
+            $validated['rating'] = $validated['rating'] ?? '0';
+            $validated['in_stock'] = $validated['in_stock'] ?? '1';
+            $validated['purchaseType'] = $validated['purchaseType'] ?? 'purchase';
 
-        // Delete old images (only local ones)
-        if (!empty($lab->images)) {
-            foreach ($lab->images as $oldImage) {
-                if (!filter_var($oldImage, FILTER_VALIDATE_URL)) {
-                    Storage::disk('public')->delete($oldImage);
+            $lab->fill($validated);
+
+            // Handle avatar
+            if ($request->hasFile('avatar')) {
+                if ($lab->avatar && !filter_var($lab->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($lab->avatar);
+                }
+                $lab->avatar = $request->file('avatar')->store('images/labs', 'public');
+            } elseif ($request->filled('avatar_url')) {
+                if ($lab->avatar && !filter_var($lab->avatar, FILTER_VALIDATE_URL)) {
+                    Storage::disk('public')->delete($lab->avatar);
+                }
+                $lab->avatar = $request->input('avatar_url');
+            }
+
+            // Handle multiple images (merge old + new)
+            $allImages = $lab->images ?? [];
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $image) {
+                    $path = $image->store('images/labs', 'public');
+                    if ($path) $allImages[] = $path;
                 }
             }
-        }
-
-        // Handle uploaded image files
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('images/labs', 'public');
-                if ($path) {
-                    $allImages[] = $path;
-                }
+            if ($request->filled('images_url')) {
+                $urls = array_map('trim', explode(',', $request->input('images_url')));
+                $allImages = array_merge($allImages, array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL)));
             }
+
+            $lab->images = $allImages;
+            $lab->save();
+
+            return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->with('error', 'Error updating lab item: ' . $e->getMessage());
         }
-
-        // Handle external image URLs
-        if ($request->filled('images_url')) {
-            $urls = array_map('trim', explode(',', $request->input('images_url')));
-            $validUrls = array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
-            $allImages = array_merge($allImages, $validUrls);
-        }
-
-        $lab->images = $allImages;
-
-
-        $lab->save();
-
-        return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
     }
 
     public function destroy(Lab $lab)
