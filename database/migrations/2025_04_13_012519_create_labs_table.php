@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('labs', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Product name
-            $table->enum('category', ['apparatus', 'specimen', 'chemical']); // Category
+            $table->enum('category', ['laboratory','textbooks','stationery','school_accessories','boardingSchool','sports','food','health','furniture','technology']); // Category
             $table->string('avatar')->nullable(); // Main product image
             $table->json('images')->nullable(); // Other product images
             $table->string('color')->nullable(); // Product color
