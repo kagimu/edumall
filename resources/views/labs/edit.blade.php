@@ -53,16 +53,16 @@
                     <label for="category">Category:</label>
                     <select name="category" id="category" class="form-control">
                         <option value="" disabled>Select a category</option>
-                        <option value="laboratory" {{ old('category') == 'laboratory' ? 'selected' : '' }}>Laboratory</option>
-                        <option value="textbooks" {{ old('category') == 'textbooks' ? 'selected' : '' }}>Textbooks</option>
-                        <option value="stationery" {{ old('category') == 'stationery' ? 'selected' : '' }}>Stationery</option>
-                        <option value="school_accessories" {{ old('category') == 'school_accessories' ? 'selected' : '' }}>School Wear and Accessories</option>
-                        <option value="boardingSchool" {{ old('category') == 'boardingSchool' ? 'selected' : '' }}>Boarding School</option>
-                        <option value="sports" {{ old('category') == 'sports' ? 'selected' : '' }}>Sports & Physical Education</option>
-                        <option value="food" {{ old('category') == 'food' ? 'selected' : '' }}>Food & Snacks </option>
-                        <option value="technology" {{ old('category') == 'technology' ? 'selected' : '' }}>Technology</option>
-                        <option value="furniture" {{ old('category') == 'furniture' ? 'selected' : '' }}>Furniture</option>
-                        <option value="health" {{ old('category') == 'health' ? 'selected' : '' }}>Health</option>
+                        <option value="laboratory" {{ old('category', $lab->category) == 'laboratory' ? 'selected' : '' }}>Laboratory</option>
+                        <option value="textbooks" {{ old('category', $lab->category) == 'textbooks' ? 'selected' : '' }}>Textbooks</option>
+                        <option value="stationery" {{ old('category', $lab->category) == 'stationery' ? 'selected' : '' }}>Stationery</option>
+                        <option value="school_accessories" {{ old('category', $lab->category) == 'school_accessories' ? 'selected' : '' }}>School Wear and Accessories</option>
+                        <option value="boardingSchool" {{ old('category', $lab->category) == 'boardingSchool' ? 'selected' : '' }}>Boarding School</option>
+                        <option value="sports" {{ old('category', $lab->category) == 'sports' ? 'selected' : '' }}>Sports & Physical Education</option>
+                        <option value="food" {{ old('category', $lab->category) == 'food' ? 'selected' : '' }}>Food & Snacks</option>
+                        <option value="technology" {{ old('category', $lab->category) == 'technology' ? 'selected' : '' }}>Technology</option>
+                        <option value="furniture" {{ old('category', $lab->category) == 'furniture' ? 'selected' : '' }}>Furniture</option>
+                        <option value="health" {{ old('category', $lab->category) == 'health' ? 'selected' : '' }}>Health</option>
                     </select>
                     @error('category')
                         <div class="alert alert-danger mt-1 mb-1">{{ $message }}</div>
@@ -140,9 +140,20 @@
                     <input type="file" name="images[]" id="images" class="form-control" multiple />
                 </div>
 
+                <!-- Additional Image URLs -->
+                @php
+                    $imageUrls = isset($lab->images) ? array_filter($lab->images, fn($img) => filter_var($img, FILTER_VALIDATE_URL)) : [];
+                    $imageUrls = array_unique($imageUrls); // Remove duplicates
+                @endphp
                 <div class="form-group mt-3">
                     <label for="images_url">Or enter image URLs (comma-separated):</label>
-                    <textarea name="images_url" class="form-control" rows="3">{{ old('images_url', isset($lab->images) ? implode(',', array_filter($lab->images ?? [], fn($img) => filter_var($img, FILTER_VALIDATE_URL))) : '') }}</textarea>
+                    <textarea name="images_url" class="form-control" rows="3">{{ old('images_url', implode(',', $imageUrls)) }}</textarea>
+                </div>
+
+                <!-- Image Previews -->
+                <div class="form-group mt-2">
+                    <label>Image Previews:</label>
+                    <div id="image-previews" class="d-flex flex-wrap gap-2"></div>
                 </div>
 
                 <button type="submit" class="btn btn-primary mt-4 mb-0">Update Product</button>
@@ -152,6 +163,7 @@
 </div>
 
 <script>
+    // Subcategory handling
     const subcategories = @json($subcategories);
     const categorySelect = document.getElementById('category');
     const subContainer = document.getElementById('subcategory-container');
@@ -175,6 +187,46 @@
 
     populateSubcategory(categorySelect.value, "{{ old('subcategory', $lab->subcategory ?? '') }}");
     categorySelect.addEventListener('change', () => populateSubcategory(categorySelect.value));
+
+    // Image previews
+    const imagesInput = document.getElementById('images');
+    const imagesUrlTextarea = document.querySelector('textarea[name="images_url"]');
+    const previewContainer = document.getElementById('image-previews');
+
+    function updatePreviews() {
+        previewContainer.innerHTML = '';
+
+        // Uploaded files
+        if (imagesInput.files) {
+            Array.from(imagesInput.files).forEach(file => {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.width = 100;
+                img.height = 100;
+                img.style.objectFit = 'cover';
+                img.classList.add('border', 'p-1');
+                previewContainer.appendChild(img);
+            });
+        }
+
+        // URL images
+        const urls = imagesUrlTextarea.value.split(',').map(u => u.trim()).filter(u => u);
+        urls.forEach(url => {
+            const img = document.createElement('img');
+            img.src = url;
+            img.width = 100;
+            img.height = 100;
+            img.style.objectFit = 'cover';
+            img.classList.add('border', 'p-1');
+            previewContainer.appendChild(img);
+        });
+    }
+
+    imagesInput.addEventListener('change', updatePreviews);
+    imagesUrlTextarea.addEventListener('input', updatePreviews);
+
+    // Initial load
+    updatePreviews();
 </script>
 
 @endsection

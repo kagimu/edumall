@@ -81,19 +81,25 @@ class LabController extends Controller
             }
 
             // Handle multiple images (uploaded + URLs)
-            $allImages = [];
+            $newImages = [];
+
+            // Uploaded files
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('images/labs', 'public');
-                    if ($path) $allImages[] = $path;
+                    if ($path) $newImages[] = $path;
                 }
             }
+
+            // URLs from textarea
             if ($request->filled('images_url')) {
                 $urls = array_map('trim', explode(',', $request->input('images_url')));
-                $allImages = array_merge($allImages, array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL)));
+                $urls = array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
+                $newImages = array_merge($newImages, $urls);
             }
 
-            $lab->images = $allImages;
+            // Remove duplicates
+            $lab->images = array_unique($newImages);
             $lab->save();
 
             return redirect()->route('labs.index')->with('success', 'Lab item created successfully.');
@@ -106,6 +112,7 @@ class LabController extends Controller
             return redirect()->back()->withInput()->with('error', 'Error creating lab item: ' . $e->getMessage());
         }
     }
+
 
     /**
      * Show the specified resource.
@@ -123,10 +130,10 @@ class LabController extends Controller
         return view('labs.edit', ['lab' => $lab, 'subcategories' => $this->subcategories]);
     }
 
-    public function update(Request $request, Lab $lab)
+   public function update(Request $request, Lab $lab)
     {
         try {
-            // Base validation rules
+            // Base validation rules (same as store)
             $rules = [
                 'name' => 'required|string',
                 'category' => 'required|in:laboratory,textbooks,stationery,school_accessories,boardingSchool,sports,food,health,furniture,technology',
@@ -152,7 +159,7 @@ class LabController extends Controller
 
             $validated = $request->validate($rules);
 
-            // Set defaults if null
+            // Set default values
             $validated['rating'] = $validated['rating'] ?? '0';
             $validated['in_stock'] = $validated['in_stock'] ?? '1';
             $validated['purchaseType'] = $validated['purchaseType'] ?? 'purchase';
@@ -173,19 +180,23 @@ class LabController extends Controller
             }
 
             // Handle multiple images (merge old + new)
-            $allImages = $lab->images ?? [];
+            $newImages = [];
+
             if ($request->hasFile('images')) {
                 foreach ($request->file('images') as $image) {
                     $path = $image->store('images/labs', 'public');
-                    if ($path) $allImages[] = $path;
+                    if ($path) $newImages[] = $path;
                 }
             }
+
             if ($request->filled('images_url')) {
                 $urls = array_map('trim', explode(',', $request->input('images_url')));
-                $allImages = array_merge($allImages, array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL)));
+                $urls = array_filter($urls, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
+                $newImages = array_merge($newImages, $urls);
             }
 
-            $lab->images = $allImages;
+            // Merge old images with new, remove duplicates
+            $lab->images = array_unique(array_merge($lab->images ?? [], $newImages));
             $lab->save();
 
             return redirect()->route('labs.index')->with('status', 'Lab updated successfully.');
@@ -196,6 +207,7 @@ class LabController extends Controller
             return redirect()->back()->withInput()->with('error', 'Error updating lab item: ' . $e->getMessage());
         }
     }
+
 
     public function destroy(Lab $lab)
     {
