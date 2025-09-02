@@ -173,6 +173,17 @@
 
             </form>
         </div>
+         <hr>
+
+        <h3>Bulk Upload Products (Excel)</h3>
+        <form action="{{ route('labs.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="form-group">
+                <label for="excel_file">Upload Excel File:</label>
+                <input type="file" name="excel_file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Import Products</button>
+        </form>
     </div>
 </div>
 

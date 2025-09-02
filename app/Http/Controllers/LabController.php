@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProductsImport;
 
 class LabController extends Controller
 {
@@ -224,5 +226,17 @@ class LabController extends Controller
         $lab->delete();
 
         return redirect()->route('labs.index')->with('success', 'Lab deleted successfully.');
+    }
+
+    
+    public function import(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+
+        Excel::import(new ProductsImport, $request->file('excel_file'));
+
+        return redirect()->back()->with('success', 'Products imported successfully!');
     }
 }
