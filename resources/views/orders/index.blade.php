@@ -30,6 +30,7 @@
                             <th>Payment</th>
                             <th>Total (UGX)</th>
                             <th>Delivery Fee (UGX)</th>
+                            <th>Distance (KM)</th>
                             <th>Status</th>
                             <th>Items</th>
                             <th>Date</th>
