@@ -44,14 +44,15 @@ class OrderController extends Controller
             return view('orders.index', compact('orders'));
         }
 
-    public function store(Request $request)
+   public function store(Request $request)
     {
-       $user = auth()->user();
+        $user = auth()->user();
 
         if (!$user) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
         }
 
+        // Validate the incoming request
         $validated = $request->validate([
             'customer_name' => 'required|string',
             'customer_email' => 'required|email',
@@ -62,12 +63,14 @@ class OrderController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
             'items.*.price' => 'required|numeric',
             'subtotal' => 'required|numeric',
-            'delivery_fee' => 'required|numeric',
+            'distance_km' => 'required|numeric',       // distance in KM
+            'delivery_fee' => 'required|numeric',   // fee in UGX
             'total' => 'required|numeric',
             'payment_method' => 'required|string',
             'payment_status' => 'required|in:pending,paid',
         ]);
 
+        // Create order
         $order = new Order();
         $order->user_id = $user->id;
         $order->customer_name = $validated['customer_name'];
@@ -75,14 +78,14 @@ class OrderController extends Controller
         $order->customer_phone = $validated['customer_phone'];
         $order->delivery_info = json_encode($validated['address']);
         $order->subtotal = $validated['subtotal'];
-        $order->delivery_fee = $validated['delivery_fee'];
+        $order->distance_km = $validated['distance_km'];           // save distance
+        $order->delivery_fee = $validated['delivery_fee'];   // save delivery fee
         $order->total = $validated['total'];
         $order->payment_method = $validated['payment_method'];
         $order->payment_status = $validated['payment_status'];
         $order->save();
 
-
-
+        // Save order items
         foreach ($validated['items'] as $item) {
             $order->items()->create([
                 'product_id' => $item['product_id'],
@@ -91,31 +94,27 @@ class OrderController extends Controller
             ]);
         }
 
-        // Send order confirmation email
-       try {
-            Mail::to($order->customer_email)->send(new OrderConfirmation($order));
+        // Send confirmation email
+        try {
+            Mail::to($order->customer_email)->send(new \App\Mail\OrderConfirmation($order));
         } catch (\Exception $e) {
-            \Log::error('Mail failed: ' . $e->getMessage());
+            \Log::error('Mail failed for order #' . $order->id . ': ' . $e->getMessage());
         }
 
-
-        $order = Order::with('items', 'user')->find($order->id);
-
-
+        // Send SMS notification
         try {
-           $sms = new \App\Notifications\SMSNotification();
+            $sms = new \App\Notifications\SMSNotification();
             $sms->sendOrderMessage($order);
-
         } catch (\Exception $e) {
             \Log::error("Failed to send SMS for order #{$order->id}: " . $e->getMessage());
         }
-
 
         return response()->json([
             'message' => 'Order placed successfully',
             'order_id' => $order->id,
         ], 201);
     }
+
 
     public function checkPendingOrder(Request $request)
     {

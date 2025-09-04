@@ -29,6 +29,7 @@
                             <th>Delivery Address</th>
                             <th>Payment</th>
                             <th>Total (UGX)</th>
+                            <th>Delivery Fee (UGX)</th>
                             <th>Status</th>
                             <th>Items</th>
                             <th>Date</th>
@@ -51,6 +52,8 @@
                                 </td>
                                 <td>{{ $order->payment_method }} ({{ $order->payment_status }})</td>
                                 <td>{{ number_format($order->total) }}</td>
+                                <td>{{ number_format($order->delivery_fee) }}</td>
+                                <td>{{ number_format($order->distance_km) }}</td>
                                 <td>
                                     @if($order->payment_status === 'paid')
                                         <span class="badge badge-success">Paid</span>
