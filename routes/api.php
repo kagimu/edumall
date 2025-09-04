@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\StationaryController;
 use App\Http\Controllers\SportsController;
-use App\Http\Controllers\EventsController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\FurnitureController;
 use App\Http\Controllers\LibraryController;
@@ -49,7 +48,6 @@ Route::post('/flutterwave/webhook', [CheckoutController::class, 'handleWebhook']
 // API routes for various resources
 Route::get('/stationary', [StationaryController::class, 'getStationary']);
 Route::get('/sports', [SportsController::class, 'getSports']);
-Route::get('/events', [EventsController::class, 'getEvents']);
 Route::get('/holidays', [HolidayController::class, 'getHolidays']);
 Route::get('/furniture', [FurnitureController::class, 'getFurniture']);
 Route::get('/libraries', [LibraryController::class, 'getLibraries'])->name('api.libraries') ;

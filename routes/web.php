@@ -71,12 +71,18 @@
         Route::put('/libraries/{library}', [LibraryController::class, 'update'])->name('update.libraries');
         Route::delete('/libraries/{library}', [LibraryController::class, 'destroy'])->name('destroy.libraries');
 
-    Route::get('/all-labs', [LabController::class, 'index'])->name('labs.index');
+            // Labs CRUD
+        Route::get('/all-labs', [LabController::class, 'index'])->name('labs.index');
         Route::get('/labs/create', [LabController::class, 'create'])->name('labs.create');
         Route::post('/labs/store', [LabController::class, 'store'])->name('labs.store');
         Route::get('/labs/{lab}/edit', [LabController::class, 'edit'])->name('labs.edit');
         Route::put('/labs/{lab}', [LabController::class, 'update'])->name('labs.update');
         Route::delete('/labs/{lab}', [LabController::class, 'destroy'])->name('labs.destroy');
+
+        // Import labs
+        Route::post('/labs/import', [LabController::class, 'import'])->name('labs.import');
+
+
 
         Route::get('/computerLabs', [ComputerLabController::class, 'index'])->name('index.computerLabs');
         Route::get('/computerLabs/create', [ComputerLabController::class, 'create'])->name('create.computerLabs');
