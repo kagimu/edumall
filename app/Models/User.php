@@ -35,6 +35,7 @@ class User extends Authenticatable
     'institution_name',
     'centre_number',
     'district',
+    'county',
     'subcounty',
     'parish',
     'village',
