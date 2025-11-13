@@ -46,79 +46,91 @@ class OrderController extends Controller
         }
 
    public function store(Request $request)
-    {
-        $user = auth()->user();
+        {
+            $user = auth()->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
+            if (!$user) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
 
-        // Validate the incoming request
-        $validated = $request->validate([
-            'customer_name' => 'required|string',
-            'customer_email' => 'required|email',
-            'customer_phone' => 'required|string',
-            'address' => 'required|array',
-            'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|integer',
-            'items.*.quantity' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric',
-            'subtotal' => 'required|numeric',
-            'distance_km' => 'required|numeric',       // distance in KM
-            'delivery_fee' => 'required|numeric',   // fee in UGX
-            'total' => 'required|numeric',
-            'payment_method' => 'required|string',
-            'payment_status' => 'required|in:pending,paid',
-        ]);
-
-        // Create order
-        $order = new Order();
-        $order->user_id = $user->id;
-        $order->customer_name = $validated['customer_name'];
-        $order->customer_email = $validated['customer_email'];
-        $order->customer_phone = $validated['customer_phone'];
-        $order->delivery_info = json_encode($validated['address']);
-        $order->subtotal = $validated['subtotal'];
-        $order->distance_km = $validated['distance_km'];           // save distance
-        $order->delivery_fee = $validated['delivery_fee'];   // save delivery fee
-        $order->total = $validated['total'];
-        $order->payment_method = $validated['payment_method'];
-        $order->payment_status = $validated['payment_status'];
-        $order->save();
-
-        // Save order items
-        foreach ($validated['items'] as $item) {
-            $order->items()->create([
-                'product_id' => $item['product_id'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
+            // Validate incoming request
+            $validated = $request->validate([
+                'customer_name' => 'required|string',
+                'customer_email' => 'required|email',
+                'customer_phone' => 'required|string',
+                'address' => 'required|array',
+                'items' => 'required|array|min:1',
+                'items.*.product_id' => 'required|integer',
+                'items.*.quantity' => 'required|integer|min:1',
+                'items.*.price' => 'required|numeric',
+                'subtotal' => 'required|numeric',
+                'distance_km' => 'required|numeric',
+                'delivery_fee' => 'required|numeric',
+                'total' => 'required|numeric',
+                'payment_method' => 'required|string',
+                'payment_status' => 'required|in:pending,paid',
             ]);
+
+            // Create order
+            $order = new Order();
+            $order->user_id = $user->id;
+            $order->customer_name = $validated['customer_name'];
+            $order->customer_email = $validated['customer_email'];
+            // Ensure phone is in international format for sandbox
+            $order->customer_phone = preg_replace('/^0/', '+256', $validated['customer_phone']);
+            $order->delivery_info = json_encode($validated['address']);
+            $order->subtotal = $validated['subtotal'];
+            $order->distance_km = $validated['distance_km'];
+            $order->delivery_fee = $validated['delivery_fee'];
+            $order->total = $validated['total'];
+            $order->payment_method = $validated['payment_method'];
+            $order->payment_status = $validated['payment_status'];
+            $order->save();
+
+            // Save order items
+            foreach ($validated['items'] as $item) {
+                $order->items()->create([
+                    'product_id' => $item['product_id'],
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+
+            // Send confirmation email
+            try {
+                Mail::to($order->customer_email)->send(new \App\Mail\OrderConfirmation($order));
+            } catch (\Exception $e) {
+                \Log::error('Mail failed for order #' . $order->id . ': ' . $e->getMessage());
+            }
+
+            // Initialize SMS service
+            $smsService = new \App\Services\SmsService();
+
+            // Customer SMS
+            $customerMessage = "Hello {$order->customer_name}, your order #{$order->id} has been received and is being processed. [Sandbox Test]";
+            try {
+                $result = $smsService->sendSms($order->customer_phone, $customerMessage);
+                \Log::info('Customer SMS response:', ['response' => $result]);
+            } catch (\Exception $e) {
+                \Log::error('Customer SMS failed: ' . $e->getMessage());
+            }
+
+            // Admin SMS (sandbox requires verified number)
+            $adminNumber = '+256762833491';
+            $adminMessage = "New order #{$order->id} received from {$order->customer_name}. Total: UGX {$order->total}";
+            try {
+                $result = $smsService->sendSms($adminNumber, $adminMessage);
+                \Log::info('Admin SMS response:', ['response' => $result]);
+            } catch (\Exception $e) {
+                \Log::error('Admin SMS failed: ' . $e->getMessage());
+            }
+
+            return response()->json([
+                'message' => 'Order placed successfully. SMS sent (sandbox, check logs for response).',
+                'order_id' => $order->id,
+            ], 201);
         }
 
-        // Send confirmation email
-        try {
-            Mail::to($order->customer_email)->send(new \App\Mail\OrderConfirmation($order));
-        } catch (\Exception $e) {
-            \Log::error('Mail failed for order #' . $order->id . ': ' . $e->getMessage());
-        }
-
-        // Send SMS notification
-       // Initialize SMS service
-        $smsService = new \App\Services\SmsService();
-
-        // Send SMS to customer
-        $customerMessage = "Hello {$order->customer_name}, your order #{$order->id} has been received and is being processed. Thank you for shopping with EDUMALL-UG.";
-        $smsService->sendSms($order->customer_phone, $customerMessage);
-
-        // Send SMS to admin
-        $adminMessage = "New order #{$order->id} received from {$order->customer_name}. Total: UGX {$order->total}";
-        $smsService->sendSms('+256762833491', $adminMessage);
-
-        return response()->json([
-            'message' => 'Order placed successfully and sms sent successfully',
-            'order_id' => $order->id,
-        ], 201);
-    }
 
 
     public function checkPendingOrder(Request $request)
