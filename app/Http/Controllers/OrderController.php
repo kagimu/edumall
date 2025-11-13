@@ -8,6 +8,7 @@ use App\Mail\OrderConfirmation;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use App\Services\AfricasTalkingService;
 
 
 class OrderController extends Controller
@@ -102,15 +103,19 @@ class OrderController extends Controller
         }
 
         // Send SMS notification
-        try {
-            $sms = new \App\Notifications\SMSNotification();
-            $sms->sendOrderMessage($order);
-        } catch (\Exception $e) {
-            \Log::error("Failed to send SMS for order #{$order->id}: " . $e->getMessage());
-        }
+       // Initialize SMS service
+        $smsService = new \App\Services\AfricasTalkingService();
+
+        // Send SMS to customer
+        $customerMessage = "Hello {$order->customer_name}, your order #{$order->id} has been received and is being processed. Thank you for shopping with EDUMALL-UG.";
+        $smsService->sendSms($order->customer_phone, $customerMessage);
+
+        // Send SMS to admin
+        $adminMessage = "New order #{$order->id} received from {$order->customer_name}. Total: UGX {$order->total}";
+        $smsService->sendSms('+256762833491', $adminMessage);
 
         return response()->json([
-            'message' => 'Order placed successfully',
+            'message' => 'Order placed successfully and sms sent successfully',
             'order_id' => $order->id,
         ], 201);
     }
