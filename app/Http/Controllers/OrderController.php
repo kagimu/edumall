@@ -8,7 +8,7 @@ use App\Mail\OrderConfirmation;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
-use App\Services\AfricasTalkingService;
+use App\Services\SmsService;
 
 
 class OrderController extends Controller
@@ -104,7 +104,7 @@ class OrderController extends Controller
 
         // Send SMS notification
        // Initialize SMS service
-        $smsService = new \App\Services\AfricasTalkingService();
+        $smsService = new \App\Services\SmsService();
 
         // Send SMS to customer
         $customerMessage = "Hello {$order->customer_name}, your order #{$order->id} has been received and is being processed. Thank you for shopping with EDUMALL-UG.";
