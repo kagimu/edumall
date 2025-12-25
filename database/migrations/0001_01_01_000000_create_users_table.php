@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('mobileMoneyNumber')->nullable();
             $table->string('paymentMethods')->nullable(); // Store payment methods as JSON
             $table->string('role')->default('client'); // Default role
+            $table->foreignId('role_id')->constrained()->onDelete('cascade');
             $table->string('position')->nullable(); // Nullable position field
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

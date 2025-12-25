@@ -32,6 +32,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/cart/remove/{product_id}', [CartController::class, 'remove']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
+    //inventory routes
+    Route::apiResource('items', ItemController::class);
+    Route::get('items/low-stock', [ItemController::class,'lowStock']);
+    Route::apiResource('suppliers', SupplierController::class);
+    Route::apiResource('locations', LocationController::class);
+    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('stock-movements', StockMovementController::class);
+
     Route::get('/orders/pending', [OrderController::class, 'checkPendingOrder']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::post('/checkout/confirm-pay-on-delivery', [OrderController::class, 'confirmPayOnDelivery']);
