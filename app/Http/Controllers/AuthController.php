@@ -62,6 +62,7 @@ class AuthController extends Controller
             'admin_name' => $request->adminName,
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
+            'role_id' => 1, // Link to admin role
         ]);
         $schoolId = $school->id;
     }
