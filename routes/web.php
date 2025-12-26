@@ -13,6 +13,7 @@
     use App\Http\Controllers\OrderController;
     use App\Http\Controllers\CartController;
     use App\Http\Controllers\CheckoutController;
+    use App\Http\Controllers\SchoolController;
     use App\Http\Controllers\AuthController;
     use Illuminate\Support\Facades\Auth;
 
@@ -49,6 +50,10 @@
         Route::delete('/sports/{sports}', [SportsController::class, 'destroy'])->name('destroy.sports');
 
         Route::get('/users', [AuthController::class, 'getAllUsersTable'])->name('users.index');
+
+        // Schools management
+        Route::get('/schools', [SchoolController::class, 'index'])->name('schools.index');
+        Route::put('/schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
 
         Route::get('/holidays', [HolidayController::class, 'index'])->name('index.holidays');
         Route::get('/holidays/create', [HolidayController::class, 'create'])->name('create.holidays');

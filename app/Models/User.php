@@ -43,7 +43,10 @@ class User extends Authenticatable
     'customDesignation',
     'adminEmail',
     'adminPhone',
-];
+    'role_id',
+    'school_id',
+    'is_school_admin',
+  ];
 
 
     /**
@@ -79,6 +82,10 @@ class User extends Authenticatable
 
         public function movements() {
             return $this->hasMany(StockMovement::class);
+        }
+
+        public function school() {
+            return $this->belongsTo(School::class);
         }
 
 }

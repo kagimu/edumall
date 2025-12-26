@@ -47,11 +47,11 @@
             <div class="card-body">
                 <div class="d-flex no-block align-items-center">
                     <div>
-                        <h6 class="text-white">Orders Made</h6>
-                        <h2 class="text-white m-0 font-weight-bold">{{$orders ?? '0'}}</h2>
+                        <h6 class="text-white">Registered Schools</h6>
+                        <h2 class="text-white m-0 font-weight-bold">{{$schoolsCount ?? '0'}}</h2>
                     </div>
                     <div class="ml-auto">
-                        <span class="text-white display-6"><i class="fa fa-wrench fa-2x"></i></span>
+                        <span class="text-white display-6"><i class="fa fa-school fa-2x"></i></span>
                     </div>
                 </div>
             </div>
@@ -75,69 +75,103 @@
 <div class="col-xl-12 col-lg-12 col-md-12">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">All Orders</h3>
+            <h3 class="card-title">Registered Schools</h3>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered text-nowrap mb-0">
                     <thead>
                         <tr>
-                            <th>Order ID</th>
-                            <th>Customer Name</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Delivery Address</th>
-                            <th>Payment</th>
-                            <th>Total (UGX)</th>
+                            <th>School ID</th>
+                            <th>School Name</th>
+                            <th>Centre Number</th>
+                            <th>District</th>
+                            <th>Admin Name</th>
+                            <th>Admin Email</th>
+                            <th>Admin Phone</th>
                             <th>Status</th>
-                            <th>Items</th>
-                            <th>Date</th>
+                            <th>Registered Date</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($orders as $order)
-                            @php
-                                $delivery = json_decode($order->delivery_info, true);
-                            @endphp
+                        @foreach($schools as $school)
                             <tr>
-                                <td>#{{ $order->id }}</td>
-                                <td>{{ $order->customer_name }}</td>
-                                <td>{{ $order->customer_phone }}</td>
-                                <td>{{ $order->customer_email }}</td>
+                                <td>#{{ $school->id }}</td>
+                                <td>{{ $school->name }}</td>
+                                <td>{{ $school->centre_number }}</td>
+                                <td>{{ $school->district }}</td>
+                                <td>{{ $school->admin_name }}</td>
+                                <td>{{ $school->admin_email }}</td>
+                                <td>{{ $school->admin_phone }}</td>
                                 <td>
-                                    {{ $delivery['address'] ?? '' }},
-                                    {{ $delivery['city'] ?? '' }},
-                                    {{ $delivery['district'] ?? '' }}
-                                </td>
-                                <td>{{ $order->payment_method }} ({{ $order->payment_status }})</td>
-                                <td>{{ number_format($order->total) }}</td>
-                                <td>
-                                    @if($order->payment_status === 'paid')
-                                        <span class="badge badge-success">Paid</span>
+                                    @if($school->status === 'active')
+                                        <span class="badge badge-success">Active</span>
+                                    @elseif($school->status === 'inactive')
+                                        <span class="badge badge-warning">Inactive</span>
+                                    @elseif($school->status === 'suspended')
+                                        <span class="badge badge-danger">Suspended</span>
                                     @else
-                                        <span class="badge badge-warning">Pending</span>
+                                        <span class="badge badge-secondary">{{ $school->status }}</span>
                                     @endif
                                 </td>
+                                <td>{{ $school->created_at->format('Y-m-d H:i') }}</td>
                                 <td>
-                                    <ul style="padding-left: 16px;">
-                                        @foreach($order->items as $item)
-                                            <li>{{ $item->product->name ?? 'Item Name' }} --> {{ $item->quantity }}</li>
-                                        @endforeach
-                                    </ul>
+                                    <div class="btn-group" role="group">
+                                        @if($school->status === 'active')
+                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="inactive">
+                                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this school?')">Deactivate</button>
+                                            </form>
+                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="suspended">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this school?')">Suspend</button>
+                                            </form>
+                                        @elseif($school->status === 'inactive')
+                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="active">
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to activate this school?')">Activate</button>
+                                            </form>
+                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="suspended">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this school?')">Suspend</button>
+                                            </form>
+                                        @elseif($school->status === 'suspended')
+                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="active">
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to activate this school?')">Activate</button>
+                                            </form>
+                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="hidden" name="status" value="inactive">
+                                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this school?')">Deactivate</button>
+                                            </form>
+                                        @endif
+                                    </div>
                                 </td>
-                                <td>{{ $order->created_at->format('Y-m-d H:i') }}</td>
                             </tr>
                         @endforeach
 
-                        @if($orders->isEmpty())
+                        @if($schools->isEmpty())
                             <tr>
-                                <td colspan="10" class="text-center text-muted">No orders found.</td>
+                                <td colspan="13" class="text-center text-muted">No schools registered.</td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
                 <div class="mt-3">
-                    {{ $orders->links('pagination::bootstrap-4') }}
+                    {{ $schools->links('pagination::bootstrap-4') }}
                 </div>
 
             </div>

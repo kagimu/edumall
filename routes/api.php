@@ -14,12 +14,17 @@ use App\Http\Controllers\ComputerLabController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ItemController;
+use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\TeacherPasscodeController;
 
 
 // Public login routes (no middleware)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 Route::get('/users', [AuthController::class, 'getAllUsers']);
 
 
@@ -45,6 +50,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/checkout/confirm-pay-on-delivery', [OrderController::class, 'confirmPayOnDelivery']);
     Route::get('/orders', [OrderController::class, 'index']);
 
+    // Admin routes for school management
+    Route::apiResource('schools', SchoolController::class)->only(['index', 'update']);
+
+    // Teacher passcode management
+    Route::apiResource('teacher-passcodes', TeacherPasscodeController::class);
 
 });
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Lab;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\School;
 use Illuminate\Http\Request;
 
 
@@ -17,14 +18,14 @@ class DashboardController extends Controller
         session(['title' => 'Dashboard']);
 
         $labs = number_format(Lab::count());
-        $orders = number_format(Order::count());
+        $schoolsCount = number_format(School::count());
         $users = number_format(User::count());
 
-          // Eager load related items for display
-        $orders = Order::with('items.product')->latest()->paginate(10);
+          // Get registered schools for display
+        $schools = School::latest()->paginate(10);
 
 
 
-        return view('dashboard', compact('labs', 'users', 'orders'));
+        return view('dashboard', compact('labs', 'users', 'schools', 'schoolsCount'));
     }
 }

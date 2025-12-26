@@ -37,4 +37,18 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
         $this->middleware('auth')->only('logout');
     }
+
+    /**
+     * Get the post login redirect path.
+     *
+     * @return string
+     */
+    protected function redirectTo()
+    {
+        if (auth()->user()->accountType === 'institution') {
+            return '/inventory';
+        }
+
+        return '/dashboard';
+    }
 }
