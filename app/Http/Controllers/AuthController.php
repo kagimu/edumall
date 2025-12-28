@@ -56,9 +56,6 @@ class AuthController extends Controller
             'name' => $request->institution_name,
             'centre_number' => $request->centre_number,
             'district' => $request->district,
-            'subcounty' => $request->subcounty,
-            'parish' => $request->parish,
-            'village' => $request->village,
             'admin_name' => $request->adminName,
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
@@ -92,9 +89,6 @@ class AuthController extends Controller
         'centre_number' => $request->accountType === 'institution' ? $request->centre_number : null,
 
         'district' => $request->district,
-        'subcounty' => $request->subcounty,
-        'parish' => $request->parish,
-        'village' => $request->village,
 
         'adminName' => $request->accountType === 'institution' ? $request->adminName : null,
         'customDesignation' => $request->designation === 'Other'
