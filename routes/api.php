@@ -18,6 +18,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\TeacherPasscodeController;
+use App\Http\Controllers\LabAccessCodeController;
 
 
 // Public login routes (no middleware)
@@ -55,6 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Teacher passcode management
     Route::apiResource('teacher-passcodes', TeacherPasscodeController::class);
+
+    // Lab access code management
+    Route::apiResource('lab-access-codes', LabAccessCodeController::class);
 
 });
 
