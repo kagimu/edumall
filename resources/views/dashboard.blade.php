@@ -75,105 +75,52 @@
 <div class="col-xl-12 col-lg-12 col-md-12">
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Registered Schools</h3>
+            <h3 class="card-title">Schools Management</h3>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered text-nowrap mb-0">
+                <table id="schools-table" class="table table-bordered text-nowrap mb-0">
                     <thead>
                         <tr>
-                            <th>School ID</th>
-                            <th>School Name</th>
+                            <th>Name</th>
                             <th>Centre Number</th>
                             <th>District</th>
                             <th>Admin Name</th>
                             <th>Admin Email</th>
-                            <th>Admin Phone</th>
                             <th>Status</th>
-                            <th>Registered Date</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($schools as $school)
-                            <tr>
-                                <td>#{{ $school->id }}</td>
-                                <td>{{ $school->name }}</td>
-                                <td>{{ $school->centre_number }}</td>
-                                <td>{{ $school->district }}</td>
-                                <td>{{ $school->admin_name }}</td>
-                                <td>{{ $school->admin_email }}</td>
-                                <td>{{ $school->admin_phone }}</td>
-                                <td>
-                                    @if($school->status === 'active')
-                                        <span class="badge badge-success">Active</span>
-                                    @elseif($school->status === 'inactive')
-                                        <span class="badge badge-warning">Inactive</span>
-                                    @elseif($school->status === 'suspended')
-                                        <span class="badge badge-danger">Suspended</span>
-                                    @else
-                                        <span class="badge badge-secondary">{{ $school->status }}</span>
-                                    @endif
-                                </td>
-                                <td>{{ $school->created_at->format('Y-m-d H:i') }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        @if($school->status === 'active')
-                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="status" value="inactive">
-                                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this school?')">Deactivate</button>
-                                            </form>
-                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="status" value="suspended">
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this school?')">Suspend</button>
-                                            </form>
-                                        @elseif($school->status === 'inactive')
-                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="status" value="active">
-                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to activate this school?')">Activate</button>
-                                            </form>
-                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="status" value="suspended">
-                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to suspend this school?')">Suspend</button>
-                                            </form>
-                                        @elseif($school->status === 'suspended')
-                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="status" value="active">
-                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Are you sure you want to activate this school?')">Activate</button>
-                                            </form>
-                                            <form action="{{ route('schools.update', $school) }}" method="POST" style="display: inline;">
-                                                @csrf
-                                                @method('PUT')
-                                                <input type="hidden" name="status" value="inactive">
-                                                <button type="submit" class="btn btn-sm btn-warning" onclick="return confirm('Are you sure you want to deactivate this school?')">Deactivate</button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
+                        <tr data-id="{{ $school->id }}">
+                            <td>{{ $school->name }}</td>
+                            <td>{{ $school->centre_number }}</td>
+                            <td>{{ $school->district }}</td>
+                            <td>{{ $school->admin_name }}</td>
+                            <td>{{ $school->user ? $school->user->email : $school->admin_email }}</td>
+                            <td>
+                                @if($school->status === 'active')
+                                    <span class="badge badge-success">Active</span>
+                                @elseif($school->status === 'inactive')
+                                    <span class="badge badge-warning">Inactive</span>
+                                @elseif($school->status === 'pending')
+                                    <span class="badge badge-info">Pending</span>
+                                @elseif($school->status === 'suspended')
+                                    <span class="badge badge-danger">Suspended</span>
+                                @else
+                                    <span class="badge badge-secondary">{{ $school->status }}</span>
+                                @endif
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="updateStatus({{ $school->id }}, 'active')" {{ $school->status === 'active' ? 'disabled' : '' }}>Activate</button>
+                                <button class="btn btn-sm btn-warning" onclick="updateStatus({{ $school->id }}, 'inactive')" {{ $school->status === 'inactive' ? 'disabled' : '' }}>Deactivate</button>
+                                <button class="btn btn-sm btn-danger" onclick="updateStatus({{ $school->id }}, 'suspended')" {{ $school->status === 'suspended' ? 'disabled' : '' }}>Suspend</button>
+                            </td>
+                        </tr>
                         @endforeach
-
-                        @if($schools->isEmpty())
-                            <tr>
-                                <td colspan="13" class="text-center text-muted">No schools registered.</td>
-                            </tr>
-                        @endif
                     </tbody>
                 </table>
-                <div class="mt-3">
-                    {{ $schools->links('pagination::bootstrap-4') }}
-                </div>
-
             </div>
         </div>
     </div>
@@ -182,7 +129,70 @@
 
 </div>
 
+<script>
+function updateStatus(schoolId, status) {
+    $.ajax({
+        url: '/api/schools/' + schoolId,
+        type: 'PUT',
+        data: { status: status },
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        success: function(response) {
+            // Update the row
+            var row = $('tr[data-id="' + schoolId + '"]');
+            var statusCell = row.find('td:nth-child(6)');
+            statusCell.html(getStatusBadge(status));
 
+            // Update buttons
+            row.find('button').prop('disabled', false);
+            if (status === 'active') row.find('.btn-success').prop('disabled', true);
+            else if (status === 'inactive') row.find('.btn-warning').prop('disabled', true);
+            else if (status === 'suspended') row.find('.btn-danger').prop('disabled', true);
+        },
+        error: function(xhr) {
+            alert('Error updating status: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Unknown error'));
+        }
+    });
+}
+
+function getStatusBadge(status) {
+    if (status === 'active') return '<span class="badge badge-success">Active</span>';
+    if (status === 'inactive') return '<span class="badge badge-warning">Inactive</span>';
+    if (status === 'pending') return '<span class="badge badge-info">Pending</span>';
+    if (status === 'suspended') return '<span class="badge badge-danger">Suspended</span>';
+    return '<span class="badge badge-secondary">' + status + '</span>';
+}
+
+// Realtime polling every 5 seconds
+setInterval(function() {
+    $.ajax({
+        url: '/api/schools',
+        type: 'GET',
+        success: function(data) {
+            // Update the table with new data
+            var tbody = $('#schools-table tbody');
+            tbody.empty();
+            data.forEach(function(school) {
+                var row = '<tr data-id="' + school.id + '">' +
+                    '<td>' + school.name + '</td>' +
+                    '<td>' + school.centre_number + '</td>' +
+                    '<td>' + (school.district || 'N/A') + '</td>' +
+                    '<td>' + (school.user ? school.user.firstName + ' ' + school.user.lastName : 'N/A') + '</td>' +
+                    '<td>' + (school.user ? school.user.email : school.admin_email) + '</td>' +
+                    '<td>' + getStatusBadge(school.status) + '</td>' +
+                    '<td>' +
+                        '<button class="btn btn-sm btn-success" onclick="updateStatus(' + school.id + ', \'active\')" ' + (school.status === 'active' ? 'disabled' : '') + '>Activate</button> ' +
+                        '<button class="btn btn-sm btn-warning" onclick="updateStatus(' + school.id + ', \'inactive\')" ' + (school.status === 'inactive' ? 'disabled' : '') + '>Deactivate</button> ' +
+                        '<button class="btn btn-sm btn-danger" onclick="updateStatus(' + school.id + ', \'suspended\')" ' + (school.status === 'suspended' ? 'disabled' : '') + '>Suspend</button>' +
+                    '</td>' +
+                    '</tr>';
+                tbody.append(row);
+            });
+        }
+    });
+}, 5000);
+</script>
 
 </div>
 

@@ -28,6 +28,14 @@ class AuthController extends Controller
         if ($request->filled('password')) {
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
                 $user = Auth::user();
+
+                // Check if user has a school and if it's active
+                $school = School::where('user_id', $user->id)->first();
+                if ($school && $school->status !== 'active') {
+                    Auth::logout(); // Logout the user
+                    return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
+                }
+
                 $token = $user->createToken('API Token')->plainTextToken;
 
                 return response()->json([
@@ -43,6 +51,11 @@ class AuthController extends Controller
             $school = School::where('admin_email', $request->email)->first();
             if (!$school) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
+            }
+
+            // Check if school is active
+            if ($school->status !== 'active') {
+                return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
             }
 
             // Lab access code
@@ -170,6 +183,7 @@ private function temporaryUserResponse($userObject, $role, $school)
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
             'user_id' => $user->id,
+            'status' => 'pending',
         ]);
 
         // 3️⃣ Auto-login after registration
@@ -212,5 +226,42 @@ private function temporaryUserResponse($userObject, $role, $school)
     public function getAllUsersTable(Request $request)
     {
         return response()->json(['message' => 'Get all users table not implemented'], 501);
+    }
+
+    /**
+     * Get all schools for admin management
+     */
+    public function getSchools(Request $request)
+    {
+        $schools = School::with('user')->get(); // Include user data
+        return response()->json($schools);
+    }
+
+    /**
+     * Activate or deactivate a school
+     */
+    public function updateSchoolStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:active,inactive,pending,suspended',
+        ]);
+
+        $school = School::findOrFail($id);
+        $school->status = $request->status;
+        $school->save();
+
+        return response()->json([
+            'message' => 'School status updated successfully',
+            'school' => $school,
+        ]);
+    }
+
+    /**
+     * Show schools management page (Blade view)
+     */
+    public function schoolsManagement()
+    {
+        $schools = School::with('user')->get();
+        return view('admin.schools', compact('schools'));
     }
 }
