@@ -119,10 +119,59 @@ class AuthController extends Controller
     }
 
     public function register(Request $request)
-    {
-        // Basic register method - implement as needed
-        return response()->json(['message' => 'Register not implemented'], 501);
+{
+    $validator = Validator::make($request->all(), [
+        'institution_name' => 'required|string|max:255',
+        'centre_number'    => 'required|string|max:100',
+        'district'         => 'required|string|max:100',
+
+        'adminName'  => 'required|string|max:255',
+        'adminEmail' => 'required|email|unique:users,email',
+        'adminPhone' => 'required|string|max:20',
+
+        'password' => 'required|string|min:6|confirmed',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors'  => $validator->errors(),
+        ], 422);
     }
+
+    // 1️⃣ Create User (Admin)
+    $user = User::create([
+        'firstName' => explode(' ', $request->adminName)[0],
+        'lastName'  => explode(' ', $request->adminName, 2)[1] ?? 'Admin',
+        'email'     => $request->adminEmail,
+        'phone'     => $request->adminPhone,
+        'password'  => Hash::make($request->password),
+
+        // 🔐 Automatically assign Admin role
+        'role_id'   => 1,
+    ]);
+
+    // 2️⃣ Create School
+    $school = School::create([
+        'name'        => $request->institution_name,
+        'centre_no'   => $request->centre_number,
+        'district'    => $request->district,
+        'admin_email' => $request->adminEmail,
+        'admin_phone' => $request->adminPhone,
+        'user_id'     => $user->id,
+    ]);
+
+    // 3️⃣ Create token
+    $token = $user->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Registration successful',
+        'user'    => $user,
+        'school'  => $school,
+        'token'   => $token,
+    ], 201);
+}
+
 
     public function logout(Request $request)
     {
