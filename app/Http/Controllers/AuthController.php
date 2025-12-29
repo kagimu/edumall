@@ -89,7 +89,7 @@ private function temporaryUserResponse($userObject, $role, $school)
     $schoolData = [
         'id' => $school->id,
         'name' => $school->name,
-        'centre_number' => $school->centre_no,
+        'centre_number' => $school->centre_number,
         'district' => $school->district,
         'admin_name' => $school->admin_name ?? null,
         'admin_email' => $school->admin_email,
@@ -142,7 +142,7 @@ private function temporaryUserResponse($userObject, $role, $school)
     {
         $validator = Validator::make($request->all(), [
             'institution_name' => 'required|string|max:255',
-            'centre_number' => 'required|string|max:100|unique:schools,centre_no',
+            'centre_number' => 'required|string|max:100|unique:schools,centre_number',
             'district' => 'required|string|max:100',
             'adminName' => 'required|string|max:255',
             'adminEmail' => 'required|email|unique:users,email',
@@ -158,7 +158,7 @@ private function temporaryUserResponse($userObject, $role, $school)
         }
 
         // Enforce only one admin per institution
-        if (School::where('centre_no', $request->centre_number)->exists()) {
+        if (School::where('centre_number', $request->centre_number)->exists()) {
             return response()->json([
                 'message' => 'This institution is already registered',
                 'errors' => ['centre_number' => ['An admin already exists for this institution.']],
