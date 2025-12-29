@@ -130,12 +130,9 @@
 <script>
 function updateStatus(schoolId, status) {
     $.ajax({
-        url: '/api/schools/' + schoolId,
+        url: '/schools/' + schoolId,
         type: 'PUT',
-        data: { status: status },
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
+        data: { status: status, _token: '{{ csrf_token() }}' },
         success: function(response) {
             // Update the row
             var row = $('tr[data-id="' + schoolId + '"]');
@@ -164,7 +161,7 @@ function getStatusBadge(status) {
 // Realtime polling every 5 seconds
 setInterval(function() {
     $.ajax({
-        url: '/api/schools',
+        url: '/schools',
         type: 'GET',
         success: function(data) {
             // Update the table with new data

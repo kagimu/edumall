@@ -28,6 +28,7 @@ return [
         'https://edumall-uganda.netlify.app',
         'http://localhost:5173',
         'http://localhost:4173',
+        'http://localhost:8080',
     ],
 
     'allowed_origins_patterns' => [],
