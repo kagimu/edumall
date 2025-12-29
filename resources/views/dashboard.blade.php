@@ -12,120 +12,124 @@
 
 
 <div class="row">
+    <!-- CARD 1 -->
     <div class="col-sm-12 col-md-6 col-xl-3">
         <div class="card bg-teal">
             <div class="card-body">
-                <div class="d-flex no-block align-items-center">
+                <div class="d-flex align-items-center">
                     <div>
                         <h6 class="text-white">Laboratory Products</h6>
                         <h2 class="text-white m-0 font-weight-bold">{{ $labs ?? '0' }}</h2>
                     </div>
                     <div class="ml-auto">
-                        <span class="text-white display-6"><i class="fa fa-file-text-o fa-2x"></i></span>
+                        <i class="fa fa-file-text-o fa-2x text-white"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- CARD 2 -->
     <div class="col-sm-12 col-md-6 col-xl-3">
         <div class="card bg-indigo">
             <div class="card-body">
-                <div class="d-flex no-block align-items-center">
+                <div class="d-flex align-items-center">
                     <div>
                         <h6 class="text-white">Staff</h6>
                         <h2 class="text-white m-0 font-weight-bold">Soon to come</h2>
                     </div>
                     <div class="ml-auto">
-                        <span class="text-white display-6"><i class="fa fa-users fa-2x"></i></span>
+                        <i class="fa fa-users fa-2x text-white"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- CARD 3 -->
     <div class="col-sm-12 col-md-6 col-xl-3">
         <div class="card bg-teal">
             <div class="card-body">
-                <div class="d-flex no-block align-items-center">
+                <div class="d-flex align-items-center">
                     <div>
                         <h6 class="text-white">Registered Schools</h6>
-                        <h2 class="text-white m-0 font-weight-bold">{{$schoolsCount ?? '0'}}</h2>
+                        <h2 class="text-white m-0 font-weight-bold">{{ $schoolsCount ?? '0' }}</h2>
                     </div>
                     <div class="ml-auto">
-                        <span class="text-white display-6"><i class="fa fa-school fa-2x"></i></span>
+                        <i class="fa fa-school fa-2x text-white"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- CARD 4 -->
     <div class="col-sm-12 col-md-6 col-xl-3">
         <div class="card bg-indigo">
             <div class="card-body">
-                <div class="d-flex no-block align-items-center">
+                <div class="d-flex align-items-center">
                     <div>
                         <h6 class="text-white">Clients</h6>
                         <h2 class="text-white m-0 font-weight-bold">{{ $users ?? '0' }}</h2>
                     </div>
                     <div class="ml-auto">
-                        <span class="text-white display-6"><i class="fa fa-th-list fa-2x"></i></span>
+                        <i class="fa fa-th-list fa-2x text-white"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-<div class="col-xl-12 col-lg-12 col-md-12">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Schools Management</h3>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="schools-table" class="table table-bordered text-nowrap mb-0">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Centre Number</th>
-                            <th>District</th>
-                            <th>Admin Name</th>
-                            <th>Admin Email</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($schools as $school)
-                        <tr data-id="{{ $school->id }}">
-                            <td>{{ $school->name }}</td>
-                            <td>{{ $school->centre_number }}</td>
-                            <td>{{ $school->district }}</td>
-                            <td>{{ $school->admin_name }}</td>
-                            <td>{{ $school->admin_email }}</td>
-                            <td>
-                                @if($school->status === 'active')
-                                    <span class="badge badge-success">Active</span>
-                                @elseif($school->status === 'inactive')
-                                    <span class="badge badge-warning">Inactive</span>
-                                @elseif($school->status === 'suspended')
-                                    <span class="badge badge-danger">Suspended</span>
-                                @else
-                                    <span class="badge badge-secondary">{{ $school->status }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-success" onclick="updateStatus({{ $school->id }}, 'active')" {{ $school->status === 'active' ? 'disabled' : '' }}>Activate</button>
-                                <button class="btn btn-sm btn-warning" onclick="updateStatus({{ $school->id }}, 'inactive')" {{ $school->status === 'inactive' ? 'disabled' : '' }}>Deactivate</button>
-                                <button class="btn btn-sm btn-danger" onclick="updateStatus({{ $school->id }}, 'suspended')" {{ $school->status === 'suspended' ? 'disabled' : '' }}>Suspend</button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+</div>
+
+<!-- 🔽 NEW ROW FOR FULL-WIDTH TABLE -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Schools Management</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table id="schools-table" class="table table-bordered text-nowrap mb-0 w-100">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Centre Number</th>
+                                <th>District</th>
+                                <th>Admin Name</th>
+                                <th>Admin Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($schools as $school)
+                            <tr>
+                                <td>{{ $school->name }}</td>
+                                <td>{{ $school->centre_number }}</td>
+                                <td>{{ $school->district }}</td>
+                                <td>{{ $school->admin_name }}</td>
+                                <td>{{ $school->admin_email }}</td>
+                                <td>
+                                    <span class="badge badge-{{ $school->status === 'active' ? 'success' : ($school->status === 'inactive' ? 'warning' : 'danger') }}">
+                                        {{ ucfirst($school->status) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-success">Activate</button>
+                                    <button class="btn btn-sm btn-warning">Deactivate</button>
+                                    <button class="btn btn-sm btn-danger">Suspend</button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-
-</div>
 
 <script>
 function updateStatus(schoolId, status) {
@@ -163,11 +167,12 @@ setInterval(function() {
     $.ajax({
         url: '/schools',
         type: 'GET',
-        success: function(data) {
+        success: function(response) {
             // Update the table with new data
             var tbody = $('#schools-table tbody');
             tbody.empty();
-            data.forEach(function(school) {
+            var schools = response.schools || [];
+            schools.forEach(function(school) {
                 var row = '<tr data-id="' + school.id + '">' +
                     '<td>' + school.name + '</td>' +
                     '<td>' + school.centre_number + '</td>' +

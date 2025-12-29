@@ -183,7 +183,7 @@ private function temporaryUserResponse($userObject, $role, $school)
             'admin_name' => $request->adminName,
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
-            'status' => 'inactive',
+            'status' => 'active',
         ]);
 
         // 3️⃣ Auto-login after registration
