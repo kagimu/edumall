@@ -16,27 +16,35 @@ return [
     |
     */
 
+   return [
+
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => [
-        'https://edumall-uganda.netlify.app',
-        'http://localhost:5173',  // For local development
-        'http://localhost:8080',
-        'https://edumallug.com', 
-        'http://localhost:4173',
+        'https://edumallug.com',
         'https://www.edumallug.com',
+        'https://edumall-uganda.netlify.app',
+        'http://localhost:5173',
+        'http://localhost:4173',
     ],
 
     'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+    'allowed_headers' => [
+        'Content-Type',
+        'Authorization',
+        'X-Requested-With',
+        'Accept',
+    ],
 
-    'exposed_headers' => ['*'],
+    'exposed_headers' => [],
 
-    'max_age' => 44100,
+    'max_age' => 0,
 
     'supports_credentials' => true,
+];
+
 
 ];
