@@ -23,8 +23,7 @@ return new class extends Migration
                 $table->string('customUserType')->nullable();
                 $table->string('institution_name')->nullable();
                 $table->string('centre_number')->nullable();
-                $table->string('district')->nullable();e();
-                $table->string('village')->nullable();
+                $table->string('district')->nullable();
                 $table->string('adminName')->nullable();
                 $table->string('customDesignation')->nullable();
                 $table->string('adminEmail')->nullable();

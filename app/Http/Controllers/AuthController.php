@@ -1,3 +1,42 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\School;
+use App\Models\TeacherPasscode;
+use App\Models\LabAccessCode;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Validator;
+
+class AuthController extends Controller
+{
+    public function login(Request $request)
+    {
+        // Validate input
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'nullable|string',
+            'passcode' => 'nullable|string',
+        ]);
+
+        // First try regular user login if password provided
+        if ($request->has('password') && $request->password) {
+            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
+                $user = Auth::user();
+                $token = $user->createToken('API Token')->plainTextToken;
+
+                return response()->json([
+                    'message' => 'Login successful.',
+                    'user' => $user,
+                    'token' => $token,
+                ], 200);
+            }
+        }
+
         // If password login failed or no password, try passcode login
         if ($request->has('passcode')) {
             // Find school by admin email
@@ -75,3 +114,43 @@
 
             return response()->json(['message' => 'Invalid credentials.'], 401);
         }
+
+        return response()->json(['message' => 'Invalid credentials.'], 401);
+    }
+
+    public function register(Request $request)
+    {
+        // Basic register method - implement as needed
+        return response()->json(['message' => 'Register not implemented'], 501);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out successfully']);
+    }
+
+    public function forgotPassword(Request $request)
+    {
+        // Implement forgot password
+        return response()->json(['message' => 'Forgot password not implemented'], 501);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        // Implement reset password
+        return response()->json(['message' => 'Reset password not implemented'], 501);
+    }
+
+    public function getAllUsers(Request $request)
+    {
+        // Implement get all users
+        return response()->json(['message' => 'Get all users not implemented'], 501);
+    }
+
+    public function getAllUsersTable(Request $request)
+    {
+        // Implement get all users table
+        return response()->json(['message' => 'Get all users table not implemented'], 501);
+    }
+}
