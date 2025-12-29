@@ -183,7 +183,7 @@ private function temporaryUserResponse($userObject, $role, $school)
             'admin_name' => $request->adminName,
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
-            'status' => 'pending',
+            'status' => 'inactive',
         ]);
 
         // 3️⃣ Auto-login after registration
@@ -243,7 +243,7 @@ private function temporaryUserResponse($userObject, $role, $school)
     public function updateSchoolStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:active,inactive,pending,suspended',
+            'status' => 'required|in:active,inactive,suspended',
         ]);
 
         $school = School::findOrFail($id);

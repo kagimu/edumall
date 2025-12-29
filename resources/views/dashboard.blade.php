@@ -104,8 +104,6 @@
                                     <span class="badge badge-success">Active</span>
                                 @elseif($school->status === 'inactive')
                                     <span class="badge badge-warning">Inactive</span>
-                                @elseif($school->status === 'pending')
-                                    <span class="badge badge-info">Pending</span>
                                 @elseif($school->status === 'suspended')
                                     <span class="badge badge-danger">Suspended</span>
                                 @else
@@ -159,7 +157,6 @@ function updateStatus(schoolId, status) {
 function getStatusBadge(status) {
     if (status === 'active') return '<span class="badge badge-success">Active</span>';
     if (status === 'inactive') return '<span class="badge badge-warning">Inactive</span>';
-    if (status === 'pending') return '<span class="badge badge-info">Pending</span>';
     if (status === 'suspended') return '<span class="badge badge-danger">Suspended</span>';
     return '<span class="badge badge-secondary">' + status + '</span>';
 }
