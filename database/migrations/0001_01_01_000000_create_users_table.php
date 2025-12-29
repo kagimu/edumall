@@ -22,7 +22,7 @@ return new class extends Migration
                 $table->string('accountType')->default('individual'); // Default to 'individual'
                 $table->string('customUserType')->nullable();
                 $table->string('institution_name')->nullable();
-                $table->string('centre_number')->nullable();
+                $table->string('centre_number')->unique()->nullable();
                 $table->string('district')->nullable();
                 $table->string('adminName')->nullable();
                 $table->string('customDesignation')->nullable();

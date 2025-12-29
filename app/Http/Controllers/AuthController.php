@@ -9,197 +9,221 @@ use App\Models\LabAccessCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+    /**
+     * Login user with email/password or passcode.
+     */
     public function login(Request $request)
     {
-        // Validate input
         $request->validate([
             'email' => 'required|email',
             'password' => 'nullable|string',
             'passcode' => 'nullable|string',
         ]);
 
-        // First try regular user login if password provided
-        if ($request->has('password') && $request->password) {
+        // 1️⃣ Standard password login
+        if ($request->filled('password')) {
             if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
                 $user = Auth::user();
                 $token = $user->createToken('API Token')->plainTextToken;
 
                 return response()->json([
-                    'message' => 'Login successful.',
+                    'message' => 'Login successful',
                     'user' => $user,
                     'token' => $token,
                 ], 200);
             }
         }
 
-        // If password login failed or no password, try passcode login
-        if ($request->has('passcode')) {
-            // Find school by admin email
+        // 2️⃣ Passcode login
+        if ($request->filled('passcode')) {
             $school = School::where('admin_email', $request->email)->first();
             if (!$school) {
-                return response()->json(['message' => 'Invalid credentials.'], 401);
+                return response()->json(['message' => 'Invalid credentials'], 401);
             }
 
-            // First try teacher passcode
+            // a) Teacher passcode
             $passcode = TeacherPasscode::where('school_id', $school->id)
                 ->where('passcode', $request->passcode)
                 ->where('is_active', true)
                 ->where(function ($query) {
                     $query->whereNull('expires_at')
                           ->orWhere('expires_at', '>', now());
-                })
-                ->first();
+                })->first();
 
             if ($passcode) {
-                // Create a temporary user-like object for teacher
-                $teacherUser = [
-                    'id' => 'teacher_' . $passcode->id,
-                    'name' => $passcode->teacher_name,
-                    'email' => $request->email,
-                    'accountType' => 'teacher',
-                    'role' => 'teacher',
-                    'school_id' => $school->id,
-                    'permissions' => $passcode->permissions,
-                    'passcode_id' => $passcode->id,
-                ];
-
-                // Create a token for the teacher
-                $token = 'teacher_' . $passcode->id . '_' . now()->timestamp;
-
-                return response()->json([
-                    'message' => 'Login successful.',
-                    'user' => $teacherUser,
-                    'token' => $token,
-                ], 200);
+                return $this->temporaryUserResponse($passcode, 'teacher', $school);
             }
 
-            // If teacher passcode not found, try lab access code
+            // b) Lab access code
             $accessCode = LabAccessCode::where('school_id', $school->id)
                 ->where('access_code', $request->passcode)
                 ->where('is_active', true)
                 ->where(function ($query) {
                     $query->whereNull('expires_at')
                           ->orWhere('expires_at', '>', now());
-                })
-                ->first();
+                })->first();
 
             if ($accessCode) {
-                // Create a user-like object for lab user
-                $labUser = [
-                    'id' => 'lab_' . $accessCode->id,
-                    'name' => $accessCode->user_name,
-                    'email' => $request->email,
-                    'accountType' => 'lab_user',
-                    'role' => $accessCode->role,
-                    'school_id' => $school->id,
-                    'permissions' => $accessCode->permissions,
-                    'access_code_id' => $accessCode->id,
-                    'institution_name' => $school->name,
-                ];
-
-                // Create a token for the lab user
-                $token = 'lab_' . $accessCode->id . '_' . now()->timestamp;
-
-                return response()->json([
-                    'message' => 'Login successful.',
-                    'user' => $labUser,
-                    'token' => $token,
-                ], 200);
+                return $this->temporaryUserResponse($accessCode, 'lab_user', $school);
             }
 
-            return response()->json(['message' => 'Invalid credentials.'], 401);
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        return response()->json(['message' => 'Invalid credentials.'], 401);
+        return response()->json(['message' => 'Invalid credentials'], 401);
     }
 
-    public function register(Request $request)
+    /**
+     * Helper to return temporary user response for passcode users
+     */
+    /**
+ * Helper to return temporary user response for passcode users
+ */
+private function temporaryUserResponse($userObject, $role, $school)
 {
-    $validator = Validator::make($request->all(), [
-        'institution_name' => 'required|string|max:255',
-        'centre_number'    => 'required|string|max:100',
-        'district'         => 'required|string|max:100',
+    // Build school object for frontend
+    $schoolData = [
+        'id' => $school->id,
+        'name' => $school->name,
+        'centre_number' => $school->centre_no,
+        'district' => $school->district,
+        'admin_name' => $school->admin_name ?? null,
+        'admin_email' => $school->admin_email,
+        'admin_phone' => $school->admin_phone,
+        'status' => $school->status ?? 'active',
+    ];
 
-        'adminName'  => 'required|string|max:255',
-        'adminEmail' => 'required|email|unique:users,email',
-        'adminPhone' => 'required|string|max:20',
+    // Build user object
+    $user = [
+        'id' => $role . '_' . $userObject->id,
+        'name' => $role === 'teacher' ? $userObject->teacher_name : $userObject->user_name,
+        'email' => $school->admin_email,
+        'accountType' => $role,
+        'type' => $role,
+        'role' => $role,
+        'permissions' => $userObject->permissions,
+        'school_id' => $school->id,
+        'school' => $schoolData,
+        'institution_name' => $school->name,
+        'temporary' => true, // Flag for React frontend
+    ];
 
-        'password' => 'required|string|min:6|confirmed',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'message' => 'Validation failed',
-            'errors'  => $validator->errors(),
-        ], 422);
+    // Add passcode or access_code ID
+    if ($role === 'teacher') {
+        $user['passcode_id'] = $userObject->id;
+    } else {
+        $user['access_code_id'] = $userObject->id;
     }
 
-    // 1️⃣ Create User (Admin)
-    $user = User::create([
-        'firstName' => explode(' ', $request->adminName)[0],
-        'lastName'  => explode(' ', $request->adminName, 2)[1] ?? 'Admin',
-        'email'     => $request->adminEmail,
-        'phone'     => $request->adminPhone,
-        'password'  => Hash::make($request->password),
+    // Feature flags for frontend
+    $user['featureFlags'] = [
+        'labManagementEnabled' => in_array($role, ['teacher', 'lab_user']),
+    ];
 
-        // 🔐 Automatically assign Admin role
-        'role_id'   => 1,
-    ]);
-
-    // 2️⃣ Create School
-    $school = School::create([
-        'name'        => $request->institution_name,
-        'centre_no'   => $request->centre_number,
-        'district'    => $request->district,
-        'admin_email' => $request->adminEmail,
-        'admin_phone' => $request->adminPhone,
-        'user_id'     => $user->id,
-    ]);
-
-    // 3️⃣ Create token
-    $token = $user->createToken('API Token')->plainTextToken;
+    // Generate temporary token
+    $token = $role . '_' . $userObject->id . '_' . now()->timestamp;
 
     return response()->json([
-        'message' => 'Registration successful',
-        'user'    => $user,
-        'school'  => $school,
-        'token'   => $token,
-    ], 201);
+        'message' => 'Login successful',
+        'user' => $user,
+        'token' => $token,
+    ], 200);
 }
 
 
+    /**
+     * Register a new institution with only one admin allowed.
+     */
+    public function register(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'institution_name' => 'required|string|max:255',
+            'centre_number' => 'required|string|max:100|unique:schools,centre_no',
+            'district' => 'required|string|max:100',
+            'adminName' => 'required|string|max:255',
+            'adminEmail' => 'required|email|unique:users,email',
+            'adminPhone' => 'required|string|max:20',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        // Enforce only one admin per institution
+        if (School::where('centre_no', $request->centre_number)->exists()) {
+            return response()->json([
+                'message' => 'This institution is already registered',
+                'errors' => ['centre_number' => ['An admin already exists for this institution.']],
+            ], 409);
+        }
+
+        // 1️⃣ Create admin user
+        $user = User::create([
+            'firstName' => explode(' ', $request->adminName)[0],
+            'lastName' => explode(' ', $request->adminName, 2)[1] ?? 'Admin',
+            'email' => $request->adminEmail,
+            'phone' => $request->adminPhone,
+            'password' => Hash::make($request->password),
+            'role_id' => 1, // Admin role
+        ]);
+
+        // 2️⃣ Create school
+        $school = School::create([
+            'name' => $request->institution_name,
+            'centre_no' => $request->centre_number,
+            'district' => $request->district,
+            'admin_email' => $request->adminEmail,
+            'admin_phone' => $request->adminPhone,
+            'user_id' => $user->id,
+        ]);
+
+        // 3️⃣ Auto-login after registration
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Registration successful',
+            'user' => $user,
+            'school' => $school,
+            'token' => $token,
+        ], 201);
+    }
+
+    /**
+     * Logout user and revoke token
+     */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-        return response()->json(['message' => 'Logged out successfully']);
+
+        return response()->json(['message' => 'Logged out successfully'], 200);
     }
 
+    // Optional: Placeholder methods for future implementation
     public function forgotPassword(Request $request)
     {
-        // Implement forgot password
         return response()->json(['message' => 'Forgot password not implemented'], 501);
     }
 
     public function resetPassword(Request $request)
     {
-        // Implement reset password
         return response()->json(['message' => 'Reset password not implemented'], 501);
     }
 
     public function getAllUsers(Request $request)
     {
-        // Implement get all users
         return response()->json(['message' => 'Get all users not implemented'], 501);
     }
 
     public function getAllUsersTable(Request $request)
     {
-        // Implement get all users table
         return response()->json(['message' => 'Get all users table not implemented'], 501);
     }
 }
