@@ -30,7 +30,7 @@ class AuthController extends Controller
                 $user = Auth::user();
 
                 // Check if user has a school and if it's active
-                $school = School::where('user_id', $user->id)->first();
+                $school = School::where('admin_email', $user->email)->first();
                 if ($school && $school->status !== 'active') {
                     Auth::logout(); // Logout the user
                     return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
@@ -180,9 +180,9 @@ private function temporaryUserResponse($userObject, $role, $school)
             'name' => $request->institution_name,
             'centre_number' => $request->centre_number,
             'district' => $request->district,
+            'admin_name' => $request->adminName,
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
-            'user_id' => $user->id,
             'status' => 'pending',
         ]);
 
@@ -233,7 +233,7 @@ private function temporaryUserResponse($userObject, $role, $school)
      */
     public function getSchools(Request $request)
     {
-        $schools = School::with('user')->get(); // Include user data
+        $schools = School::all();
         return response()->json($schools);
     }
 
@@ -261,7 +261,7 @@ private function temporaryUserResponse($userObject, $role, $school)
      */
     public function schoolsManagement()
     {
-        $schools = School::with('user')->get();
+        $schools = School::all();
         return view('admin.schools', compact('schools'));
     }
 }

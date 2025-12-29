@@ -98,7 +98,7 @@
                             <td>{{ $school->centre_number }}</td>
                             <td>{{ $school->district }}</td>
                             <td>{{ $school->admin_name }}</td>
-                            <td>{{ $school->user ? $school->user->email : $school->admin_email }}</td>
+                            <td>{{ $school->admin_email }}</td>
                             <td>
                                 @if($school->status === 'active')
                                     <span class="badge badge-success">Active</span>
@@ -178,8 +178,8 @@ setInterval(function() {
                     '<td>' + school.name + '</td>' +
                     '<td>' + school.centre_number + '</td>' +
                     '<td>' + (school.district || 'N/A') + '</td>' +
-                    '<td>' + (school.user ? school.user.firstName + ' ' + school.user.lastName : 'N/A') + '</td>' +
-                    '<td>' + (school.user ? school.user.email : school.admin_email) + '</td>' +
+                    '<td>' + school.admin_name + '</td>' +
+                    '<td>' + school.admin_email + '</td>' +
                     '<td>' + getStatusBadge(school.status) + '</td>' +
                     '<td>' +
                         '<button class="btn btn-sm btn-success" onclick="updateStatus(' + school.id + ', \'active\')" ' + (school.status === 'active' ? 'disabled' : '') + '>Activate</button> ' +
