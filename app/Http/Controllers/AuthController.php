@@ -38,27 +38,14 @@ class AuthController extends Controller
             }
         }
 
-        // 2️⃣ Passcode login
+        // 2️⃣ Lab access code login
         if ($request->filled('passcode')) {
             $school = School::where('admin_email', $request->email)->first();
             if (!$school) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
 
-            // a) Teacher passcode
-            $passcode = TeacherPasscode::where('school_id', $school->id)
-                ->where('passcode', $request->passcode)
-                ->where('is_active', true)
-                ->where(function ($query) {
-                    $query->whereNull('expires_at')
-                          ->orWhere('expires_at', '>', now());
-                })->first();
-
-            if ($passcode) {
-                return $this->temporaryUserResponse($passcode, 'teacher', $school);
-            }
-
-            // b) Lab access code
+            // Lab access code
             $accessCode = LabAccessCode::where('school_id', $school->id)
                 ->where('access_code', $request->passcode)
                 ->where('is_active', true)
