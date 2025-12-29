@@ -14,6 +14,8 @@ class LabAccessCode extends Model
         'school_id',
         'access_code',
         'user_name',
+        'email',
+        'role',
         'permissions',
         'created_by',
         'expires_at',

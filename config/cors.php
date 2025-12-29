@@ -26,6 +26,7 @@ return [
         'http://localhost:8080',
         'https://edumallug.com', 
         'http://localhost:4173',
+        'https://www.edumallug.com',
     ],
 
     'allowed_origins_patterns' => [],

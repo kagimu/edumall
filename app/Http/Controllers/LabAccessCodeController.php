@@ -42,6 +42,8 @@ class LabAccessCodeController extends Controller
 
         $request->validate([
             'user_name' => 'required|string',
+            'email' => 'nullable|email',
+            'role' => 'nullable|string',
             'permissions' => 'nullable|array',
         ]);
 
@@ -51,6 +53,8 @@ class LabAccessCodeController extends Controller
             'school_id' => $user->school_id,
             'access_code' => $accessCode,
             'user_name' => $request->user_name,
+            'email' => $request->email,
+            'role' => $request->role,
             'permissions' => $request->permissions ?? [],
             'created_by' => $user->id,
         ]);
@@ -84,11 +88,13 @@ class LabAccessCodeController extends Controller
 
         $request->validate([
             'user_name' => 'sometimes|string',
+            'email' => 'sometimes|email',
+            'role' => 'sometimes|string',
             'permissions' => 'sometimes|array',
             'is_active' => 'sometimes|boolean',
         ]);
 
-        $accessCode->update($request->only(['user_name', 'permissions', 'is_active']));
+        $accessCode->update($request->only(['user_name', 'email', 'role', 'permissions', 'is_active']));
         return response()->json($accessCode);
     }
 
