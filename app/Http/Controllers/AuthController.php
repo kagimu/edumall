@@ -178,7 +178,7 @@ private function temporaryUserResponse($userObject, $role, $school)
         // 2️⃣ Create school
         $school = School::create([
             'name' => $request->institution_name,
-            'centre_no' => $request->centre_number,
+            'centre_number' => $request->centre_number,
             'district' => $request->district,
             'admin_email' => $request->adminEmail,
             'admin_phone' => $request->adminPhone,
