@@ -11,20 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lab_access_codes', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('school_id')->constrained('schools')->onDelete('cascade');
-            $table->string('access_code')->unique();
-            $table->string('user_name');
-            $table->string('email')->nullable();
-            $table->string('role')->nullable();
-            $table->json('permissions');
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
-            $table->timestamp('expires_at')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
-    }
+        if (!Schema::hasTable('lab_access_codes')) {
+                Schema::create('lab_access_codes', function (Blueprint $table) {
+                    $table->id();
+                    $table->foreignId('school_id')->constrained('schools')->onDelete('cascade');
+                    $table->string('access_code')->unique();
+                    $table->string('user_name');
+                    $table->string('email')->nullable();
+                    $table->string('role')->nullable();
+                    $table->json('permissions');
+                    $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
+                    $table->timestamp('expires_at')->nullable();
+                    $table->boolean('is_active')->default(true);
+                    $table->timestamps();
+                });
+            }
+ }   
 
     /**
      * Reverse the migrations.
