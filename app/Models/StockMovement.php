@@ -8,12 +8,21 @@ use Illuminate\Database\Eloquent\Builder;
 class StockMovement extends Model
 {
     protected $fillable = [
+        'school_id',
         'item_id',
-        'user_id',
+        'created_by',
         'type',
         'quantity',
-        'note',
-        'school_id',
+        'reason',
+        'notes',
+        'is_updated',
+        'created_at',
+
+    ];
+
+    protected $casts = [
+        'date' => 'datetime',
+        'is_updated' => 'boolean',
     ];
 
     protected static function booted()
@@ -30,11 +39,17 @@ class StockMovement extends Model
         return $this->belongsTo(Item::class);
     }
 
-    public function user() {
-        return $this->belongsTo(User::class);
-    }
+     public function creator()
+        {
+            return $this->belongsTo(User::class, 'created_by');
+        }
 
     public function school() {
         return $this->belongsTo(School::class);
+    }
+
+    public function updateHistory()
+    {
+        return $this->hasMany(TransactionUpdateHistory::class);
     }
 }

@@ -13,12 +13,19 @@ return new class extends Migration
     {
         Schema::create('stock_movements', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->enum('type', ['in','out','adjustment']);
+            $table->foreignId('school_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('item_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('created_by')->constrained('users');
+
+            $table->enum('type', ['purchase', 'use', 'disposal', 'return']);
             $table->integer('quantity');
-            $table->string('note')->nullable();
-            $table->timestamps();
+
+            $table->text('reason'); // REQUIRED for audit
+            $table->text('notes')->nullable();
+
+            $table->boolean('is_updated')->default(false);
+
+            $table->timestamp('created_at');
         });
     }
 

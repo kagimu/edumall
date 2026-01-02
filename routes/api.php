@@ -42,9 +42,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('items', ItemController::class);
     Route::get('items/low-stock', [ItemController::class,'lowStock']);
     Route::apiResource('suppliers', SupplierController::class);
-    Route::apiResource('locations', LocationController::class);
+    Route::apiResource('storage-locations', LocationController::class);
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('stock-movements', StockMovementController::class);
+
+    Route::get('/lab/calendar', [LabCalendarController::class, 'index']);
+    Route::post('/lab/sessions', [LabCalendarController::class, 'store']);
+    Route::put('/lab/sessions/{labSession}', [LabCalendarController::class, 'update']);
+    Route::delete('/lab/sessions/{labSession}', [LabCalendarController::class, 'destroy']);
 
     Route::get('/orders/pending', [OrderController::class, 'checkPendingOrder']);
     Route::post('/orders', [OrderController::class, 'store']);

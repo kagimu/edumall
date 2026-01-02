@@ -12,6 +12,7 @@ class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         Item::class => StockPolicy::class,
+        \App\Models\Location::class => \App\Policies\StorageLocationPolicy::class,
     ];
 
     /**

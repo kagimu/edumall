@@ -13,8 +13,13 @@ return new class extends Migration
     {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('school_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->enum('type', ['shelf', 'drawer', 'bench', 'cabinet']);
+            $table->enum('lab_type', ['chemistry', 'physics', 'biology', 'agriculture']);
+            $table->unsignedInteger('capacity')->default(100);
             $table->timestamps();
+            $table->unique(['school_id', 'name']); // prevent duplicates per school
         });
     }
 

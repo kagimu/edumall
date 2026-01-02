@@ -36,6 +36,8 @@ class AuthController extends Controller
                     return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
                 }
 
+                $user->accountType = 'institution';
+
                 $token = $user->createToken('API Token')->plainTextToken;
 
                 return response()->json([
@@ -187,6 +189,7 @@ private function temporaryUserResponse($userObject, $role, $school)
         ]);
 
         // 3️⃣ Auto-login after registration
+        $user->accountType = 'institution';
         $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
