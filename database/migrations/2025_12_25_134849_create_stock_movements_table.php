@@ -11,22 +11,24 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_movements', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('school_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('item_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('created_by')->constrained('users');
+        if (!Schema::hasTable('stock_movements')) {
+            Schema::create('stock_movements', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('school_id');
+                $table->foreignId('item_id');
+                $table->foreignId('created_by');
 
-            $table->enum('type', ['purchase', 'use', 'disposal', 'return']);
-            $table->integer('quantity');
+                $table->enum('type', ['purchase', 'use', 'disposal', 'return']);
+                $table->integer('quantity');
 
-            $table->text('reason'); // REQUIRED for audit
-            $table->text('notes')->nullable();
+                $table->text('reason'); // REQUIRED for audit
+                $table->text('notes')->nullable();
 
-            $table->boolean('is_updated')->default(false);
+                $table->boolean('is_updated')->default(false);
 
-            $table->timestamp('created_at');
-        });
+                $table->timestamp('created_at');
+            });
+        }
     }
 
     /**
