@@ -14,9 +14,7 @@ return new class extends Migration
         if (!Schema::hasTable('transaction_update_histories')) {
             Schema::create('transaction_update_histories', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('inventory_transaction_id')
-                    ->constrained()
-                    ->cascadeOnDelete();
+                $table->foreignId('inventory_transaction_id');
 
                 $table->foreignId('updated_by')->constrained('users');
 
