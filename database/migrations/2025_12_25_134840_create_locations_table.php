@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('locations')) {
         Schema::create('locations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
@@ -19,6 +20,7 @@ return new class extends Migration
             $table->unique(['school_id', 'name']); // prevent duplicates per school
         });
     }
+}
 
     /**
      * Reverse the migrations.
