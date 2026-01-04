@@ -11,21 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaction_update_histories', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('inventory_transaction_id')
-                ->constrained()
-                ->cascadeOnDelete();
+        if (!Schema::hasTable('transaction_update_histories')) {
+            Schema::create('transaction_update_histories', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('inventory_transaction_id')
+                    ->constrained()
+                    ->cascadeOnDelete();
 
-            $table->foreignId('updated_by')->constrained('users');
+                $table->foreignId('updated_by')->constrained('users');
 
-            $table->json('previous_values');
-            $table->json('new_values');
+                $table->json('previous_values');
+                $table->json('new_values');
 
-            $table->text('update_reason');
-            $table->timestamp('updated_at');
-        });
-
+                $table->text('update_reason');
+                $table->timestamp('updated_at');
+            });
+        }
     }
 
     /**
