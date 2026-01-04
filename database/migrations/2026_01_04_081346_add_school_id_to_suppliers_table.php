@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('suppliers', function (Blueprint $table) {
-            $table->foreignId('school_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('school_id');
             $table->unique(['school_id', 'name']); // prevent duplicates per school
         });
     }
