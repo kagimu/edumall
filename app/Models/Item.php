@@ -16,6 +16,8 @@ class Item extends Model
         'min_quantity',
         'expiry_date',
         'school_id',
+        'unit',
+        'unit_cost',
     ];
 
     protected static function booted()

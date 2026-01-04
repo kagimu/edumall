@@ -33,6 +33,8 @@ class ItemController extends Controller
         'quantity' => 'required|integer|min:0',
         'min_quantity' => 'required|integer|min:0',
         'expiry_date' => 'nullable|date',
+        'unit' => 'nullable|string|max:50',
+        'unit_cost' => 'nullable|numeric|min:0',
     ]);
 
     // ✅ Link item to admin's school
@@ -55,6 +57,8 @@ class ItemController extends Controller
             'quantity' => 'sometimes|required|integer|min:0',
             'min_quantity' => 'sometimes|required|integer|min:0',
             'expiry_date' => 'nullable|date',
+            'unit' => 'sometimes|nullable|string|max:50',
+            'unit_cost' => 'sometimes|nullable|numeric|min:0',
         ]);
 
         $item->update($validated);
