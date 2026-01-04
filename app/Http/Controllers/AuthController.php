@@ -30,7 +30,7 @@ class AuthController extends Controller
                 $user = Auth::user();
 
                 // Check if user has a school and if it's active
-                $school = School::where('admin_email', $user->email)->first();
+                $school = $user->school;
                 if ($school && $school->status !== 'active') {
                     Auth::logout(); // Logout the user
                     return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
@@ -140,65 +140,58 @@ private function temporaryUserResponse($userObject, $role, $school)
     /**
      * Register a new institution with only one admin allowed.
      */
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'institution_name' => 'required|string|max:255',
-            'centre_number' => 'required|string|max:100|unique:schools,centre_number',
-            'district' => 'required|string|max:100',
-            'adminName' => 'required|string|max:255',
-            'adminEmail' => 'required|email|unique:users,email',
-            'adminPhone' => 'required|string|max:20',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
+   public function register(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'institution_name' => 'required|string|max:255',
+        'centre_number' => 'required|string|max:100|unique:schools,centre_number',
+        'district' => 'required|string|max:100',
+        'adminName' => 'required|string|max:255',
+        'adminEmail' => 'required|email|unique:users,email',
+        'adminPhone' => 'required|string|max:20',
+        'password' => 'required|string|min:6|confirmed',
+    ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        // Enforce only one admin per institution
-        if (School::where('centre_number', $request->centre_number)->exists()) {
-            return response()->json([
-                'message' => 'This institution is already registered',
-                'errors' => ['centre_number' => ['An admin already exists for this institution.']],
-            ], 409);
-        }
-
-        // 1️⃣ Create admin user
-        $user = User::create([
-            'firstName' => explode(' ', $request->adminName)[0],
-            'lastName' => explode(' ', $request->adminName, 2)[1] ?? 'Admin',
-            'email' => $request->adminEmail,
-            'phone' => $request->adminPhone,
-            'password' => Hash::make($request->password),
-            'role_id' => 1, // Admin role
-        ]);
-
-        // 2️⃣ Create school
-        $school = School::create([
-            'name' => $request->institution_name,
-            'centre_number' => $request->centre_number,
-            'district' => $request->district,
-            'admin_name' => $request->adminName,
-            'admin_email' => $request->adminEmail,
-            'admin_phone' => $request->adminPhone,
-            'status' => 'active',
-        ]);
-
-        // 3️⃣ Auto-login after registration
-        $user->accountType = 'institution';
-        $token = $user->createToken('API Token')->plainTextToken;
-
+    if ($validator->fails()) {
         return response()->json([
-            'message' => 'Registration successful',
-            'user' => $user,
-            'school' => $school,
-            'token' => $token,
-        ], 201);
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ], 422);
     }
+
+    // 1️⃣ Create school FIRST
+    $school = School::create([
+        'name' => $request->institution_name,
+        'centre_number' => $request->centre_number,
+        'district' => $request->district,
+        'admin_name' => $request->adminName,
+        'admin_email' => $request->adminEmail,
+        'admin_phone' => $request->adminPhone,
+        'status' => 'active',
+    ]);
+
+    // 2️⃣ Create admin user and LINK school_id
+    $user = User::create([
+        'firstName' => explode(' ', $request->adminName)[0],
+        'lastName' => explode(' ', $request->adminName, 2)[1] ?? 'Admin',
+        'email' => $request->adminEmail,
+        'phone' => $request->adminPhone,
+        'password' => Hash::make($request->password),
+        'role_id' => 1,          // Admin
+        'school_id' => $school->id, // 🔥 FIX
+    ]);
+
+    // 3️⃣ Auto-login
+    $token = $user->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Registration successful',
+        'user' => $user,
+        'school' => $school,
+        'token' => $token,
+    ], 201);
+}
+
 
     /**
      * Logout user and revoke token

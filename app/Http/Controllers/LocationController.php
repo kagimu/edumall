@@ -11,7 +11,7 @@ class LocationController extends Controller
     {
         $schoolId = $request->user()->school_id;
 
-        $query = StorageLocation::where('school_id', $schoolId)
+        $query = Location::where('school_id', $schoolId)
             ->withCount('items as current_usage');
 
         if ($request->filled('labType')) {
@@ -23,21 +23,25 @@ class LocationController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorize('create', StorageLocation::class);
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        if (!$user->school_id) {
+            return response()->json(['error' => 'User does not have an associated school'], 400);
+        }
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:shelf,drawer,bench,cabinet',
-            'labType' => 'required|in:chemistry,physics,biology,agriculture',
-            'capacity' => 'required|integer|min:1',
         ]);
 
-        $location = StorageLocation::create([
-            'school_id' => $request->user()->school_id,
+        $location = Location::create([
+            'school_id' => $user->school_id,
             'name' => $data['name'],
-            'type' => $data['type'],
-            'lab_type' => $data['labType'],
-            'capacity' => $data['capacity'],
+            'type' => $request->type ?? 'shelf',
+            'lab_type' => $request->labType ?? 'chemistry',
+            'capacity' => $request->capacity ?? 100,
         ]);
 
         return response()->json($location->loadCount('items'), 201);
@@ -51,9 +55,9 @@ class LocationController extends Controller
 
     public function update(Request $request, Location $location)
     {
-       $this->authorize('update', $storageLocation);
+       $this->authorize('update', $location);
 
-        $storageLocation->update(
+        $location->update(
             $request->validate([
                 'name' => 'sometimes|required|string|max:255',
                 'type' => 'sometimes|required|in:shelf,drawer,bench,cabinet',
@@ -62,25 +66,25 @@ class LocationController extends Controller
             ])
         );
 
-        return response()->json($storageLocation->loadCount('items'));
+        return response()->json($location->loadCount('items'));
     }
 
     public function destroy(Location $location)
     {
         $user = request()->user();
-        if (!$user->is_school_admin || $location->school_id !== $user->school_id) {
+        if (!$user || $user->role_id !== 1 || $location->school_id !== $user->school_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage locations.'], 403);
         }
 
-               $this->authorize('delete', $storageLocation);
+               $this->authorize('delete', $location);
 
-        if ($storageLocation->items()->exists()) {
+        if ($location->items()->exists()) {
             return response()->json([
                 'message' => 'Cannot delete location with items inside'
             ], 422);
         }
 
-        $storageLocation->delete();
+        $location->delete();
 
         return response()->json(['message' => 'Location deleted']);
 

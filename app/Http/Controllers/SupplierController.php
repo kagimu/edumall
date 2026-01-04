@@ -10,7 +10,7 @@ class SupplierController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if (!$user->is_school_admin) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
@@ -25,7 +25,7 @@ class SupplierController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user->is_school_admin) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
@@ -54,7 +54,7 @@ class SupplierController extends Controller
     public function show(Supplier $supplier)
     {
         $user = request()->user();
-        if (!$user->is_school_admin || $supplier->school_id !== $user->school_id) {
+       if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
@@ -64,7 +64,7 @@ class SupplierController extends Controller
     public function update(Request $request, Supplier $supplier)
     {
         $user = $request->user();
-        if (!$user->is_school_admin || $supplier->school_id !== $user->school_id) {
+        if (!$user->role_id !== 1 || $supplier->school_id !== $user->school_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
@@ -82,7 +82,7 @@ class SupplierController extends Controller
     public function destroy(Supplier $supplier)
     {
         $user = request()->user();
-        if (!$user->is_school_admin || $supplier->school_id !== $user->school_id) {
+        if ($user->role_id !== 1 || $supplier->school_id !== $user->school_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 

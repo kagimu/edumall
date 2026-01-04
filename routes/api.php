@@ -19,6 +19,7 @@ use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\TeacherPasscodeController;
 use App\Http\Controllers\LabAccessCodeController;
+use App\Http\Controllers\TransactionController;
 
 
 // Public login routes (no middleware)
@@ -42,8 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('items', ItemController::class);
     Route::get('items/low-stock', [ItemController::class,'lowStock']);
     Route::apiResource('suppliers', SupplierController::class);
-    Route::apiResource('storage-locations', LocationController::class);
+    Route::apiResource('locations', LocationController::class);
     Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('transactions', TransactionController::class);
     Route::apiResource('stock-movements', StockMovementController::class);
 
     Route::get('/lab/calendar', [LabCalendarController::class, 'index']);

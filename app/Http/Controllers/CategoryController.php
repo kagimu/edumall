@@ -10,7 +10,7 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if (!$user->is_school_admin) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
@@ -25,7 +25,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user->is_school_admin) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
@@ -48,7 +48,7 @@ class CategoryController extends Controller
     public function show(Category $category)
     {
         $user = request()->user();
-        if (!$user->is_school_admin || $category->school_id !== $user->school_id) {
+        if ($user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
@@ -58,7 +58,7 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $user = $request->user();
-        if (!$user->is_school_admin || $category->school_id !== $user->school_id) {
+        if ( $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
@@ -73,7 +73,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $user = request()->user();
-        if (!$user->is_school_admin || $category->school_id !== $user->school_id) {
+        if (!$user->role_id !== 1 || $category->school_id !== $user->school_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
