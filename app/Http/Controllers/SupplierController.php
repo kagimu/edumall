@@ -14,12 +14,7 @@ class SupplierController extends Controller
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
-        }
-
-        $suppliers = Supplier::where('school_id', $user->school_id)->get();
-        return response()->json($suppliers);
+        return response()->json(Supplier::all());
     }
 
     public function store(Request $request)
@@ -29,24 +24,15 @@ class SupplierController extends Controller
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
-        }
-
         $request->validate([
-            'name' => 'required|string|unique:suppliers,name,NULL,id,school_id,' . $user->school_id,
+            'name' => 'required|string|unique:suppliers,name',
             'contact' => 'nullable|string',
             'email' => 'nullable|email',
             'address' => 'nullable|string',
+            'school_id' => 'required|integer|exists:schools,id',
         ]);
 
-        $supplier = Supplier::create([
-            'school_id' => $user->school_id,
-            'name' => $request->name,
-            'contact' => $request->contact,
-            'email' => $request->email,
-            'address' => $request->address,
-        ]);
+        $supplier = Supplier::create($request->only(['school_id', 'name', 'contact', 'email', 'address']));
 
         return response()->json($supplier, 201);
     }
@@ -64,12 +50,12 @@ class SupplierController extends Controller
     public function update(Request $request, Supplier $supplier)
     {
         $user = $request->user();
-        if (!$user->role_id !== 1 || $supplier->school_id !== $user->school_id) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
         $request->validate([
-            'name' => 'required|string|unique:suppliers,name,' . $supplier->id . ',id,school_id,' . $user->school_id,
+            'name' => 'required|string|unique:suppliers,name,' . $supplier->id,
             'contact' => 'nullable|string',
             'email' => 'nullable|email',
             'address' => 'nullable|string',
@@ -82,7 +68,7 @@ class SupplierController extends Controller
     public function destroy(Supplier $supplier)
     {
         $user = request()->user();
-        if ($user->role_id !== 1 || $supplier->school_id !== $user->school_id) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 

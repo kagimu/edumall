@@ -13,7 +13,7 @@ class TransactionController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->school_id) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
@@ -32,8 +32,8 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user || !$user->school_id) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (!$user || $user->role_id !== 1 || !$user->school_id) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage transactions.'], 403);
         }
 
         $validated = $request->validate([
@@ -73,8 +73,8 @@ class TransactionController extends Controller
     public function update(Request $request, Transaction $transaction)
     {
         $user = $request->user();
-        if (!$user || $transaction->school_id !== $user->school_id) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (!$user || $user->role_id !== 1 || $transaction->school_id !== $user->school_id) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage transactions.'], 403);
         }
 
         $validated = $request->validate([
@@ -98,8 +98,8 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         $user = request()->user();
-        if (!$user || $transaction->school_id !== $user->school_id) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        if (!$user || $user->role_id !== 1 || $transaction->school_id !== $user->school_id) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage transactions.'], 403);
         }
 
         $transaction->delete();

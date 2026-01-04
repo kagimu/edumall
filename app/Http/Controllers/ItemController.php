@@ -20,11 +20,6 @@ class ItemController extends Controller
         return response()->json(['error' => 'Unauthorized. Only admins can manage inventory.'], 403);
     }
 
-    // ✅ Ensure user is linked to a school
-    if (!$user->school_id) {
-        return response()->json(['error' => 'User does not have an associated school'], 400);
-    }
-
     $validated = $request->validate([
         'name' => 'required|string|max:255',
         'category_id' => 'nullable|exists:categories,id',
@@ -35,10 +30,8 @@ class ItemController extends Controller
         'expiry_date' => 'nullable|date',
         'unit' => 'nullable|string|max:50',
         'unit_cost' => 'nullable|numeric|min:0',
+        'school_id' => 'required|integer|exists:schools,id',
     ]);
-
-    // ✅ Link item to admin's school
-    $validated['school_id'] = $user->school_id;
 
     return Item::create($validated);
 }
@@ -49,6 +42,11 @@ class ItemController extends Controller
     }
 
     public function update(Request $request, Item $item) {
+        $user = $request->user();
+        if ($user->role_id !== 1) {
+            return response()->json(['error' => 'Unauthorized. Only admins can manage inventory.'], 403);
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'category_id' => 'sometimes|nullable|exists:categories,id',
@@ -66,6 +64,11 @@ class ItemController extends Controller
     }
 
     public function destroy(Item $item) {
+        $user = request()->user();
+        if ($user->role_id !== 1) {
+            return response()->json(['error' => 'Unauthorized. Only admins can manage inventory.'], 403);
+        }
+
         $item->delete();
         return response()->json(['message' => 'Item deleted successfully']);
     }
@@ -78,3 +81,4 @@ class ItemController extends Controller
         return Item::where('school_id', session('tenant_school_id'))->pluck('name')->unique()->values();
     }
 }
+

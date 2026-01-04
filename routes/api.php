@@ -20,6 +20,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\TeacherPasscodeController;
 use App\Http\Controllers\LabAccessCodeController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ReportController;
 
 
 // Public login routes (no middleware)
@@ -66,6 +67,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Lab access code management
     Route::apiResource('lab-access-codes', LabAccessCodeController::class);
+
+    // Analytics
+    Route::get('/analytics', [ReportController::class, 'analytics']);
 
 });
 

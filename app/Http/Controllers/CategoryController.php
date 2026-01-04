@@ -73,7 +73,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $user = request()->user();
-        if (!$user->role_id !== 1 || $category->school_id !== $user->school_id) {
+        if ($user->role_id !== 1 || $category->school_id !== $user->school_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 

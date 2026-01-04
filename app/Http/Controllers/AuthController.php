@@ -37,6 +37,8 @@ class AuthController extends Controller
                 }
 
                 $user->accountType = 'institution';
+                $user->role = 'admin'; // Set role for admin users
+                $user->institution_name = $school ? $school->name : null;
 
                 $token = $user->createToken('API Token')->plainTextToken;
 

@@ -9,10 +9,7 @@ class LocationController extends Controller
 {
     public function index(Request $request)
     {
-        $schoolId = $request->user()->school_id;
-
-        $query = Location::where('school_id', $schoolId)
-            ->withCount('items as current_usage');
+        $query = Location::withCount('items as current_usage');
 
         if ($request->filled('labType')) {
             $query->where('lab_type', $request->labType);
@@ -24,20 +21,17 @@ class LocationController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
+        if (!$user || $user->role_id !== 1) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage locations.'], 403);
         }
 
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'school_id' => 'required|integer|exists:schools,id',
         ]);
 
         $location = Location::create([
-            'school_id' => $user->school_id,
+            'school_id' => $data['school_id'],
             'name' => $data['name'],
             'type' => $request->type ?? 'shelf',
             'lab_type' => $request->labType ?? 'chemistry',
@@ -55,7 +49,10 @@ class LocationController extends Controller
 
     public function update(Request $request, Location $location)
     {
-       $this->authorize('update', $location);
+        $user = $request->user();
+        if (!$user || $user->role_id !== 1 || $location->school_id !== $user->school_id) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage locations.'], 403);
+        }
 
         $location->update(
             $request->validate([

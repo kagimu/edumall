@@ -14,16 +14,11 @@ class LabAccessCodeController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        if (!$user->is_school_admin) {
+        if ($user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage lab access codes.'], 403);
         }
 
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
-        }
-
-        $accessCodes = LabAccessCode::where('school_id', $user->school_id)->get();
-        return response()->json($accessCodes);
+        return response()->json(LabAccessCode::all());
     }
 
     /**
@@ -32,12 +27,8 @@ class LabAccessCodeController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if (!$user->is_school_admin) {
+        if ($user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage lab access codes.'], 403);
-        }
-
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
         }
 
         $request->validate([
@@ -45,12 +36,13 @@ class LabAccessCodeController extends Controller
             'email' => 'nullable|email',
             'role' => 'nullable|string',
             'permissions' => 'nullable|array',
+            'school_id' => 'required|integer|exists:schools,id',
         ]);
 
         $accessCode = Str::random(8); // Generate 8-character access code
 
         $labAccessCode = LabAccessCode::create([
-            'school_id' => $user->school_id,
+            'school_id' => $request->school_id,
             'access_code' => $accessCode,
             'user_name' => $request->user_name,
             'email' => $request->email,
@@ -69,7 +61,7 @@ class LabAccessCodeController extends Controller
     {
         $accessCode = LabAccessCode::findOrFail($id);
         $user = request()->user();
-        if (!$user->is_school_admin || $accessCode->school_id !== $user->school_id) {
+        if ($user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
         return response()->json($accessCode);
@@ -82,7 +74,7 @@ class LabAccessCodeController extends Controller
     {
         $accessCode = LabAccessCode::findOrFail($id);
         $user = $request->user();
-        if (!$user->is_school_admin || $accessCode->school_id !== $user->school_id) {
+        if ($user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -105,7 +97,7 @@ class LabAccessCodeController extends Controller
     {
         $accessCode = LabAccessCode::findOrFail($id);
         $user = request()->user();
-        if (!$user->is_school_admin || $accessCode->school_id !== $user->school_id) {
+        if ($user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage lab access codes.'], 403);
         }
 

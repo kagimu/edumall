@@ -13,6 +13,11 @@ class StockMovementController extends Controller
     }
 
     public function store(Request $request) {
+        $user = $request->user();
+        if (!$user || $user->role_id !== 1) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage stock movements.'], 403);
+        }
+
         $data = $request->validate([
             'item_id' => 'required|exists:items,id',
             'type' => 'required|in:purchase,use,return,disposal',
@@ -64,6 +69,11 @@ class StockMovementController extends Controller
     }
 
     public function update(Request $request, StockMovement $stockMovement) {
+        $user = $request->user();
+        if (!$user || $user->role_id !== 1) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage stock movements.'], 403);
+        }
+
         // Note: Stock movements should typically not be editable after creation
         // This is for admin corrections only
         $data = $request->validate([
@@ -75,6 +85,11 @@ class StockMovementController extends Controller
     }
 
     public function destroy(StockMovement $stockMovement) {
+        $user = request()->user();
+        if (!$user || $user->role_id !== 1) {
+            return response()->json(['error' => 'Unauthorized. Only school administrators can manage stock movements.'], 403);
+        }
+
         // Reversing the stock movement
         $item = $stockMovement->item;
         $quantityChange = 0;
