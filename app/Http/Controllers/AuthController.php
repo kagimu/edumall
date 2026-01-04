@@ -218,7 +218,8 @@ private function temporaryUserResponse($userObject, $role, $school)
 
     public function getAllUsers(Request $request)
     {
-        return response()->json(['message' => 'Get all users not implemented'], 501);
+        $users = User::all();
+        return response()->json($users);
     }
 
     public function getAllUsersTable(Request $request)
