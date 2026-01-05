@@ -43,10 +43,10 @@ class SchoolController extends Controller
 
         // Run tenant migrations for this school
         try {
-            Artisan::call('tenants:migrate', ['--tenants' => [$school->id]]);
+            // Use migrate-fresh to ensure clean setup
+            Artisan::call('tenants:migrate-fresh', ['--tenants' => [$school->id]]);
         } catch (\Exception $e) {
-            // If migration fails, you might want to handle this
-            // For now, we'll continue but log the error
+            // If migration fails, log the error but don't fail the school creation
             \Log::error('Failed to run tenant migrations for school ' . $school->id . ': ' . $e->getMessage());
         }
 

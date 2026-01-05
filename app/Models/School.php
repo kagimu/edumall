@@ -45,4 +45,26 @@ class School extends Model implements TenantWithDatabase
     {
         return $this->status === 'active';
     }
+
+    // Implement Tenant interface methods
+    public function getTenantKeyName(): string
+    {
+        return 'id';
+    }
+
+    public function getTenantKey()
+    {
+        return $this->getKey();
+    }
+
+    public function getTenantIdentifier(): string
+    {
+        return $this->getKey();
+    }
+
+    // Implement TenantWithDatabase interface methods
+    public function getInternal(string $key): mixed
+    {
+        return $this->getAttribute($key);
+    }
 }
