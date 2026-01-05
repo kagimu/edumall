@@ -6,10 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Stancl\Tenancy\Contracts\TenantWithDatabase;
 use Stancl\Tenancy\Database\Concerns\HasDatabase;
+use Stancl\Tenancy\Database\Concerns\HasDomains;
+use Stancl\Tenancy\Concerns\HasInternalKeys;
+use Stancl\Tenancy\Concerns\TenantRun;
 
 class School extends Model implements TenantWithDatabase
 {
-    use HasFactory, HasDatabase;
+    use HasFactory;
+    use HasDatabase;
+    use HasInternalKeys;
+    use TenantRun;
 
     protected $table = 'schools';
 
@@ -26,6 +32,13 @@ class School extends Model implements TenantWithDatabase
         'status',
     ];
 
+    /** Tenant primary key */
+    public function getTenantKeyName(): string
+    {
+        return 'id';
+    }
+
+    /** Relationships */
     public function users()
     {
         return $this->hasMany(User::class);
@@ -41,30 +54,8 @@ class School extends Model implements TenantWithDatabase
         return $this->hasManyThrough(StockMovement::class, Item::class);
     }
 
-    public function isActive()
+    public function isActive(): bool
     {
         return $this->status === 'active';
-    }
-
-    // Implement Tenant interface methods
-    public function getTenantKeyName(): string
-    {
-        return 'id';
-    }
-
-    public function getTenantKey()
-    {
-        return $this->getKey();
-    }
-
-    public function getTenantIdentifier(): string
-    {
-        return $this->getKey();
-    }
-
-    // Implement TenantWithDatabase interface methods
-    public function getInternal(string $key): mixed
-    {
-        return $this->getAttribute($key);
     }
 }
