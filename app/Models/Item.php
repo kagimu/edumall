@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
 
 class Item extends Model
 {
@@ -15,20 +14,9 @@ class Item extends Model
         'quantity',
         'min_quantity',
         'expiry_date',
-        'school_id',
         'unit',
         'unit_cost',
     ];
-
-    protected static function booted()
-    {
-        static::addGlobalScope('tenant', function (Builder $builder) {
-            $schoolId = session('tenant_school_id');
-            if ($schoolId) {
-                $builder->where('school_id', $schoolId);
-            }
-        });
-    }
 
     public function category() {
         return $this->belongsTo(Category::class);
@@ -44,9 +32,5 @@ class Item extends Model
 
     public function stockMovements() {
         return $this->hasMany(StockMovement::class);
-    }
-
-    public function school() {
-        return $this->belongsTo(School::class);
     }
 }

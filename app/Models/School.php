@@ -4,10 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
+use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Database\Concerns\HasDatabase;
 
-class School extends Model
+class School extends BaseTenant implements TenantWithDatabase
 {
-    use HasFactory;
+    use HasFactory, HasDatabase;
+
+    protected $table = 'schools';
 
     protected $fillable = [
         'name',

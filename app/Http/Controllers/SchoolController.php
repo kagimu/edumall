@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\School;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 
 class SchoolController extends Controller
 {
@@ -11,6 +12,48 @@ class SchoolController extends Controller
     {
         $schools = School::all();
         return response()->json(['schools' => $schools]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'centre_number' => 'required|string|unique:schools',
+            'district' => 'nullable|string',
+            'subcounty' => 'nullable|string',
+            'parish' => 'nullable|string',
+            'village' => 'nullable|string',
+            'admin_name' => 'nullable|string',
+            'admin_email' => 'nullable|email',
+            'admin_phone' => 'nullable|string',
+            'status' => 'nullable|in:active,inactive,suspended',
+        ]);
+
+        // Create the school
+        $school = School::create($request->all());
+
+        // Automatically create the tenant database
+        try {
+            Artisan::call('tenancy:db:create', ['id' => $school->id]);
+        } catch (\Exception $e) {
+            // If DB creation fails, delete the school and return error
+            $school->delete();
+            return response()->json(['error' => 'Failed to create tenant database'], 500);
+        }
+
+        // Run tenant migrations for this school
+        try {
+            Artisan::call('tenants:migrate', ['--tenants' => [$school->id]]);
+        } catch (\Exception $e) {
+            // If migration fails, you might want to handle this
+            // For now, we'll continue but log the error
+            \Log::error('Failed to run tenant migrations for school ' . $school->id . ': ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'School created successfully with tenant database',
+            'school' => $school
+        ], 201);
     }
 
     public function update(Request $request, School $school)

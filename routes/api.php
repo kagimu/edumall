@@ -60,7 +60,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders', [OrderController::class, 'index']);
 
     // Admin routes for school management
-    Route::apiResource('schools', SchoolController::class)->only(['index', 'update']);
+    Route::apiResource('schools', SchoolController::class)->only(['index', 'store', 'update']);
 
     // Teacher passcode management
     Route::apiResource('teacher-passcodes', TeacherPasscodeController::class);

@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 class Location extends Model
 {
     protected $fillable = [
-        'school_id',
         'name',
         'type',
         'lab_type',
