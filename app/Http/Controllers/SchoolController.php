@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\School;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 
 class SchoolController extends Controller
 {
@@ -32,26 +31,8 @@ class SchoolController extends Controller
         // Create the school
         $school = School::create($request->all());
 
-        // Automatically create the tenant database
-        try {
-            Artisan::call('tenancy:db:create', ['id' => $school->id]);
-        } catch (\Exception $e) {
-            // If DB creation fails, delete the school and return error
-            $school->delete();
-            return response()->json(['error' => 'Failed to create tenant database'], 500);
-        }
-
-        // Run tenant migrations for this school
-        try {
-            // Use migrate-fresh to ensure clean setup
-            Artisan::call('tenants:migrate-fresh', ['--tenants' => [$school->id]]);
-        } catch (\Exception $e) {
-            // If migration fails, log the error but don't fail the school creation
-            \Log::error('Failed to run tenant migrations for school ' . $school->id . ': ' . $e->getMessage());
-        }
-
         return response()->json([
-            'message' => 'School created successfully with tenant database',
+            'message' => 'School created successfully',
             'school' => $school
         ], 201);
     }

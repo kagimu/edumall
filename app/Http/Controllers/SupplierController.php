@@ -14,7 +14,7 @@ class SupplierController extends Controller
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 
-        return response()->json(Supplier::all());
+        return response()->json(Supplier::where('tenant_id', $user->tenant_id)->get());
     }
 
     public function store(Request $request)
@@ -25,14 +25,19 @@ class SupplierController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|unique:suppliers,name',
+            'name' => 'required|string|unique:suppliers,name,NULL,id,tenant_id,' . $user->tenant_id,
             'contact' => 'nullable|string',
             'email' => 'nullable|email',
             'address' => 'nullable|string',
-            'school_id' => 'required|integer|exists:schools,id',
         ]);
 
-        $supplier = Supplier::create($request->only(['school_id', 'name', 'contact', 'email', 'address']));
+        $supplier = Supplier::create([
+            'tenant_id' => $user->tenant_id,
+            'name' => $request->name,
+            'contact' => $request->contact,
+            'email' => $request->email,
+            'address' => $request->address,
+        ]);
 
         return response()->json($supplier, 201);
     }
@@ -55,7 +60,7 @@ class SupplierController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|unique:suppliers,name,' . $supplier->id,
+            'name' => 'required|string|unique:suppliers,name,' . $supplier->id . ',id,tenant_id,' . $user->tenant_id,
             'contact' => 'nullable|string',
             'email' => 'nullable|email',
             'address' => 'nullable|string',
@@ -68,7 +73,7 @@ class SupplierController extends Controller
     public function destroy(Supplier $supplier)
     {
         $user = request()->user();
-        if (!$user || $user->role_id !== 1) {
+        if (!$user || $user->role_id !== 1 || $supplier->tenant_id !== $user->tenant_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage suppliers.'], 403);
         }
 

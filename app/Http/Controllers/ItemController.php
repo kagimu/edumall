@@ -4,81 +4,75 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ItemController extends Controller
 {
-    public function index() {
-        return Item::with(['category','supplier','location'])->get();
+    public function __construct()
+    {
+        $this->authorizeResource(Item::class, 'item');
     }
 
-   public function store(Request $request) {
-    $user = $request->user();
-
-    // ✅ Ensure user is an admin
-    if ($user->role_id !== 1) {
-        return response()->json(['error' => 'Unauthorized. Only admins can manage inventory.'], 403);
+    public function index()
+    {
+        return Item::with(['category', 'supplier', 'location'])->get();
     }
 
-    $validated = $request->validate([
-        'name' => 'required|string|max:255',
-        'category_id' => 'nullable|exists:categories,id',
-        'supplier_id' => 'nullable|exists:suppliers,id',
-        'location_id' => 'nullable|exists:locations,id',
-        'quantity' => 'required|integer|min:0',
-        'min_quantity' => 'required|integer|min:0',
-        'expiry_date' => 'nullable|date',
-        'unit' => 'nullable|string|max:50',
-        'unit_cost' => 'nullable|numeric|min:0',
-        'school_id' => 'required|integer|exists:schools,id',
-    ]);
-
-    return Item::create($validated);
-}
-
-
-    public function show(Item $item) {
-        return $item->load(['category','supplier','location']);
-    }
-
-    public function update(Request $request, Item $item) {
+    public function store(Request $request)
+    {
         $user = $request->user();
-        if ($user->role_id !== 1) {
-            return response()->json(['error' => 'Unauthorized. Only admins can manage inventory.'], 403);
-        }
 
         $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'nullable|exists_tenant:App\Models\Category',
+            'supplier_id' => 'nullable|exists_tenant:App\Models\Supplier',
+            'location_id' => 'nullable|exists_tenant:App\Models\Location',
+            'quantity' => 'required|integer|min:0',
+            'min_quantity' => 'required|integer|min:0',
+            'expiry_date' => 'nullable|date',
+            'unit' => 'nullable|string|max:50',
+            'unit_cost' => 'nullable|numeric|min:0',
+        ]);
+
+        $validated['tenant_id'] = $user->tenant_id;
+
+        return Item::create($validated);
+    }
+
+    public function show(Item $item)
+    {
+        return $item->load(['category', 'supplier', 'location']);
+    }
+
+    public function update(Request $request, Item $item)
+    {
+        $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
-            'category_id' => 'sometimes|nullable|exists:categories,id',
-            'supplier_id' => 'nullable|exists:suppliers,id',
-            'location_id' => 'nullable|exists:locations,id',
+            'category_id' => 'nullable|exists_tenant:App\Models\Category',
+            'supplier_id' => 'nullable|exists_tenant:App\Models\Supplier',
+            'location_id' => 'nullable|exists_tenant:App\Models\Location',
             'quantity' => 'sometimes|required|integer|min:0',
             'min_quantity' => 'sometimes|required|integer|min:0',
             'expiry_date' => 'nullable|date',
-            'unit' => 'sometimes|nullable|string|max:50',
-            'unit_cost' => 'sometimes|nullable|numeric|min:0',
+            'unit' => 'nullable|string|max:50',
+            'unit_cost' => 'nullable|numeric|min:0',
         ]);
 
         $item->update($validated);
-        return $item->load(['category','supplier','location']);
+
+        return $item->load(['category', 'supplier', 'location']);
     }
 
-    public function destroy(Item $item) {
-        $user = request()->user();
-        if ($user->role_id !== 1) {
-            return response()->json(['error' => 'Unauthorized. Only admins can manage inventory.'], 403);
-        }
-
+    public function destroy(Item $item)
+    {
         $item->delete();
-        return response()->json(['message' => 'Item deleted successfully']);
+
+        return response()->json(['message' => 'Item deleted']);
     }
 
-    public function lowStock() {
-        return Item::whereColumn('quantity','<=','min_quantity')->with(['category','supplier','location'])->get();
-    }
-
-    public function names() {
-        return Item::where('school_id', session('tenant_school_id'))->pluck('name')->unique()->values();
+    public function lowStock()
+    {
+        return Item::whereColumn('quantity', '<=', 'min_quantity')
+            ->with(['category', 'supplier', 'location'])
+            ->get();
     }
 }
-

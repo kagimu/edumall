@@ -21,6 +21,11 @@ use App\Http\Controllers\TeacherPasscodeController;
 use App\Http\Controllers\LabAccessCodeController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\LabCalendarController;
 
 
 // Public login routes (no middleware)
@@ -32,7 +37,7 @@ Route::get('/users', [AuthController::class, 'getAllUsers']);
 
 
 // Authenticated routes
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'tenant'])->group(function () {
     Route::get('/cart/all', [CartController::class, 'allCarts']);
     Route::get('/cart', [CartController::class, 'view']);               // ✅ Fetch cart
     Route::post('/cart/add', [CartController::class, 'add']);           // ✅ Add to cart
@@ -41,13 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
 
     //inventory routes
-    Route::apiResource('items', ItemController::class);
+
     Route::get('items/low-stock', [ItemController::class,'lowStock']);
-    Route::apiResource('suppliers', SupplierController::class);
-    Route::apiResource('locations', LocationController::class);
-    Route::apiResource('categories', CategoryController::class);
-    Route::apiResource('transactions', TransactionController::class);
-    Route::apiResource('stock-movements', StockMovementController::class);
 
     Route::get('/lab/calendar', [LabCalendarController::class, 'index']);
     Route::post('/lab/sessions', [LabCalendarController::class, 'store']);
@@ -59,6 +59,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/checkout/confirm-pay-on-delivery', [OrderController::class, 'confirmPayOnDelivery']);
     Route::get('/orders', [OrderController::class, 'index']);
 
+        // Analytics
+    Route::get('/analytics', [ReportController::class, 'analytics']);
+
+    Route::apiResource('items', ItemController::class);
+    Route::apiResource('suppliers', SupplierController::class);
+    Route::apiResource('locations', LocationController::class);
+    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('transactions', TransactionController::class);
+    Route::apiResource('stock-movements', StockMovementController::class);
+
+
     // Admin routes for school management
     Route::apiResource('schools', SchoolController::class)->only(['index', 'store', 'update']);
 
@@ -68,8 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Lab access code management
     Route::apiResource('lab-access-codes', LabAccessCodeController::class);
 
-    // Analytics
-    Route::get('/analytics', [ReportController::class, 'analytics']);
+
 
 });
 
@@ -93,4 +103,3 @@ Route::prefix('labs')->group(function () {
 });
 
 Route::get('/computer-labs', [ComputerLabController::class, 'getComputerLab'])->name('api.computer_lab');
-

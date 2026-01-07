@@ -9,7 +9,8 @@ class LocationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Location::withCount('items as current_usage');
+        $user = $request->user();
+        $query = Location::withCount('items as current_usage')->where('tenant_id', $user->tenant_id);
 
         if ($request->filled('labType')) {
             $query->where('lab_type', $request->labType);
@@ -26,12 +27,11 @@ class LocationController extends Controller
         }
 
         $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'school_id' => 'required|integer|exists:schools,id',
+            'name' => 'required|string|max:255|unique:locations,name,NULL,id,tenant_id,' . $user->tenant_id,
         ]);
 
         $location = Location::create([
-            'school_id' => $data['school_id'],
+            'tenant_id' => $user->tenant_id,
             'name' => $data['name'],
             'type' => $request->type ?? 'shelf',
             'lab_type' => $request->labType ?? 'chemistry',
@@ -50,18 +50,18 @@ class LocationController extends Controller
     public function update(Request $request, Location $location)
     {
         $user = $request->user();
-        if (!$user || $user->role_id !== 1 || $location->school_id !== $user->school_id) {
+        if (!$user || $user->role_id !== 1) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage locations.'], 403);
         }
 
-        $location->update(
-            $request->validate([
-                'name' => 'sometimes|required|string|max:255',
-                'type' => 'sometimes|required|in:shelf,drawer,bench,cabinet',
-                'labType' => 'sometimes|required|in:chemistry,physics,biology,agriculture',
-                'capacity' => 'sometimes|required|integer|min:1',
-            ])
-        );
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255|unique:locations,name,' . $location->id . ',id,tenant_id,' . $user->tenant_id,
+            'type' => 'sometimes|required|in:shelf,drawer,bench,cabinet',
+            'labType' => 'sometimes|required|in:chemistry,physics,biology,agriculture',
+            'capacity' => 'sometimes|required|integer|min:1',
+        ]);
+
+        $location->update($validated);
 
         return response()->json($location->loadCount('items'));
     }
@@ -69,7 +69,7 @@ class LocationController extends Controller
     public function destroy(Location $location)
     {
         $user = request()->user();
-        if (!$user || $user->role_id !== 1 || $location->school_id !== $user->school_id) {
+        if (!$user || $user->role_id !== 1 || $location->tenant_id !== $user->tenant_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage locations.'], 403);
         }
 

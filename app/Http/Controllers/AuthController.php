@@ -2,265 +2,192 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\School;
-use App\Models\TeacherPasscode;
-use App\Models\LabAccessCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Stancl\Tenancy\Facades\Tenancy;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     /**
-     * Login user with email/password or passcode.
+     * ============================
+     * REGISTER INSTITUTION (ADMIN)
+     * ============================
+     */
+
+
+    public function register(Request $request)
+    {
+        // 1️⃣ Validate the form data
+        $request->validate([
+            'institution_name' => 'required|string|max:255',
+            'centre_number'    => 'required|string|max:50|unique:schools,data->centre_number',
+            'district'         => 'required|string|max:255',
+            'adminName'        => 'required|string|max:255',
+            'adminEmail'       => 'required|email|unique:users,email',
+            'adminPhone'       => 'required|string|max:50',
+            'password'         => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = null;
+        $school = null;
+
+        // 2️⃣ Wrap creation in a transaction
+        \DB::transaction(function () use ($request, &$school, &$user) {
+            // 3️⃣ Create the school (tenant)
+            $school = School::create([
+                'id'   => \Illuminate\Support\Str::uuid(),
+                'name' => $request->institution_name,
+                'data' => [
+                    'name'             => $request->institution_name,
+                    'centre_number'    => $request->centre_number,
+                    'district'         => $request->district,
+                    'admin_name'       => $request->adminName,
+                    'admin_email'      => $request->adminEmail,
+                    'admin_phone'      => $request->adminPhone,
+                    'status'           => 'active',
+                    'paymentMethods'   => $request->paymentMethods ?? [],
+                    'mobileMoneyNumber'=> $request->mobileMoneyNumber ?? null,
+                    'bankAccount'      => $request->bankAccount ?? null,
+                    'designation'      => $request->designation ?? null,
+                    'customDesignation'=> $request->customDesignation ?? null,
+                ],
+            ]);
+
+            // 4️⃣ Create the admin user
+            $user = User::create([
+                'firstName'       => $request->adminName,
+                'lastName'        => '', // optional
+                'email'           => $request->adminEmail,
+                'phone'           => $request->adminPhone,
+                'password'        => \Hash::make($request->password),
+                'tenant_id'       => $school->id,
+                'role_id'         => 1, // Admin role
+                'is_school_admin' => true,
+            ]);
+        });
+
+        // 5️⃣ Return a clean response with token
+        return response()->json([
+            'message' => 'Registration successful',
+            'user'    => $user,
+            'school'  => $school,
+            'token'   => $user->createToken('API Token')->plainTextToken,
+        ]);
+    }
+
+
+
+
+    /**
+     * ============
+     * LOGIN USER
+     * ============
      */
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'nullable|string',
-            'passcode' => 'nullable|string',
+        $credentials = $request->validate([
+            'email'    => 'required|email',
+            'password' => 'required|string',
         ]);
 
-        // 1️⃣ Standard password login
-        if ($request->filled('password')) {
-            if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
-                $user = Auth::user();
+        $user = User::where('email', $request->email)->firstOrFail();
 
-                // Check if user has a school and if it's active
-                $school = $user->school;
-                if ($school && $school->status !== 'active') {
-                    Auth::logout(); // Logout the user
-                    return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
-                }
-
-                $user->accountType = 'institution';
-                $user->role = 'admin'; // Set role for admin users
-                $user->institution_name = $school ? $school->name : null;
-
-                $token = $user->createToken('API Token')->plainTextToken;
-
-                return response()->json([
-                    'message' => 'Login successful',
-                    'user' => $user,
-                    'token' => $token,
-                ], 200);
-            }
+        if (!Hash::check($request->password, $user->password)) {
+            throw ValidationException::withMessages([
+                'email' => ['Invalid credentials'],
+            ]);
         }
 
-        // 2️⃣ Lab access code login
-        if ($request->filled('passcode')) {
-            $school = School::where('admin_email', $request->email)->first();
-            if (!$school) {
-                return response()->json(['message' => 'Invalid credentials'], 401);
-            }
 
-            // Check if school is active
-            if ($school->status !== 'active') {
-                return response()->json(['message' => 'Account not activated. Please contact admin.'], 403);
-            }
-
-            // Lab access code
-            $accessCode = LabAccessCode::where('school_id', $school->id)
-                ->where('access_code', $request->passcode)
-                ->where('is_active', true)
-                ->where(function ($query) {
-                    $query->whereNull('expires_at')
-                          ->orWhere('expires_at', '>', now());
-                })->first();
-
-            if ($accessCode) {
-                return $this->temporaryUserResponse($accessCode, 'lab_user', $school);
-            }
-
-            return response()->json(['message' => 'Invalid credentials'], 401);
+        if ($user->school && $user->school->status !== 'active') {
+            return response()->json(['message' => 'Institution account is not active'], 403);
         }
 
-        return response()->json(['message' => 'Invalid credentials'], 401);
-    }
-
-    /**
-     * Helper to return temporary user response for passcode users
-     */
-    /**
- * Helper to return temporary user response for passcode users
- */
-private function temporaryUserResponse($userObject, $role, $school)
-{
-    // Build school object for frontend
-    $schoolData = [
-        'id' => $school->id,
-        'name' => $school->name,
-        'centre_number' => $school->centre_number,
-        'district' => $school->district,
-        'admin_name' => $school->admin_name ?? null,
-        'admin_email' => $school->admin_email,
-        'admin_phone' => $school->admin_phone,
-        'status' => $school->status ?? 'active',
-    ];
-
-    // Build user object
-    $user = [
-        'id' => $role . '_' . $userObject->id,
-        'name' => $role === 'teacher' ? $userObject->teacher_name : $userObject->user_name,
-        'email' => $school->admin_email,
-        'accountType' => $role,
-        'type' => $role,
-        'role' => $role,
-        'permissions' => $userObject->permissions,
-        'school_id' => $school->id,
-        'school' => $schoolData,
-        'institution_name' => $school->name,
-        'temporary' => true, // Flag for React frontend
-    ];
-
-    // Add passcode or access_code ID
-    if ($role === 'teacher') {
-        $user['passcode_id'] = $userObject->id;
-    } else {
-        $user['access_code_id'] = $userObject->id;
-    }
-
-    // Feature flags for frontend
-    $user['featureFlags'] = [
-        'labManagementEnabled' => in_array($role, ['teacher', 'lab_user']),
-    ];
-
-    // Generate temporary token
-    $token = $role . '_' . $userObject->id . '_' . now()->timestamp;
-
-    return response()->json([
-        'message' => 'Login successful',
-        'user' => $user,
-        'token' => $token,
-    ], 200);
-}
+        $token = $user->createToken('auth_token')->plainTextToken;
 
 
-    /**
-     * Register a new institution with only one admin allowed.
-     */
-   public function register(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'institution_name' => 'required|string|max:255',
-        'centre_number' => 'required|string|max:100|unique:schools,centre_number',
-        'district' => 'required|string|max:100',
-        'adminName' => 'required|string|max:255',
-        'adminEmail' => 'required|email|unique:users,email',
-        'adminPhone' => 'required|string|max:20',
-        'password' => 'required|string|min:6|confirmed',
-    ]);
-
-    if ($validator->fails()) {
         return response()->json([
-            'message' => 'Validation failed',
-            'errors' => $validator->errors(),
-        ], 422);
+            'message' => 'Login successful',
+            'user'    => $this->authUserResponse($user),
+            'token'   => $token,
+        ]);
     }
 
-    // 1️⃣ Create school FIRST
-    $school = School::create([
-        'name' => $request->institution_name,
-        'centre_number' => $request->centre_number,
-        'district' => $request->district,
-        'admin_name' => $request->adminName,
-        'admin_email' => $request->adminEmail,
-        'admin_phone' => $request->adminPhone,
-        'status' => 'active',
-    ]);
-
-    // 2️⃣ Create admin user and LINK school_id
-    $user = User::create([
-        'firstName' => explode(' ', $request->adminName)[0],
-        'lastName' => explode(' ', $request->adminName, 2)[1] ?? 'Admin',
-        'email' => $request->adminEmail,
-        'phone' => $request->adminPhone,
-        'password' => Hash::make($request->password),
-        'role_id' => 1,          // Admin
-        'school_id' => $school->id, // 🔥 FIX
-    ]);
-
-    // 3️⃣ Auto-login
-    $token = $user->createToken('API Token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'Registration successful',
-        'user' => $user,
-        'school' => $school,
-        'token' => $token,
-    ], 201);
-}
-
-
     /**
-     * Logout user and revoke token
+     * ============
+     * LOGOUT
+     * ============
      */
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => 'Logged out successfully'], 200);
-    }
-
-    // Optional: Placeholder methods for future implementation
-    public function forgotPassword(Request $request)
-    {
-        return response()->json(['message' => 'Forgot password not implemented'], 501);
-    }
-
-    public function resetPassword(Request $request)
-    {
-        return response()->json(['message' => 'Reset password not implemented'], 501);
-    }
-
-    public function getAllUsers(Request $request)
-    {
-        $users = User::all();
-        return response()->json($users);
-    }
-
-    public function getAllUsersTable(Request $request)
-    {
-        return response()->json(['message' => 'Get all users table not implemented'], 501);
+        return response()->json(['message' => 'Logged out']);
     }
 
     /**
-     * Get all schools for admin management
+     * ============================
+     * GET ALL USERS
+     * ============================
      */
-    public function getSchools(Request $request)
+    public function getAllUsers()
     {
-        $schools = School::all();
-        return response()->json($schools);
-    }
-
-    /**
-     * Activate or deactivate a school
-     */
-    public function updateSchoolStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:active,inactive,suspended',
-        ]);
-
-        $school = School::findOrFail($id);
-        $school->status = $request->status;
-        $school->save();
+        $users = User::with('school')->get();
 
         return response()->json([
-            'message' => 'School status updated successfully',
-            'school' => $school,
+            'users' => $users->map(function ($user) {
+                return [
+                    'id'              => $user->id,
+                    'firstName'       => $user->firstName,
+                    'lastName'        => $user->lastName,
+                    'email'           => $user->email,
+                    'role_id'         => $user->role_id,
+                    'is_school_admin' => (bool) $user->is_school_admin,
+                    'tenant_id'       => $user->tenant_id,
+                    'accountType'     => 'institution',
+                    'school' => $user->school ? [
+                        'id'     => $user->school->id,
+                        'name'   => $user->school->name,
+                        'status' => $user->school->status,
+                    ] : null,
+                ];
+            }),
         ]);
     }
 
     /**
-     * Show schools management page (Blade view)
+     * ============================
+     * STANDARD AUTH RESPONSE
+     * ============================
      */
-    public function schoolsManagement()
-    {
-        $schools = School::all();
-        return view('admin.schools', compact('schools'));
-    }
+    /**
+ * Standard auth response including full school data
+ */
+private function authUserResponse(User $user): array
+{
+    return [
+        'id'              => $user->id,
+        'firstName'       => $user->firstName,
+        'lastName'        => $user->lastName,
+        'email'           => $user->email,
+        'role_id'         => $user->role_id,
+        'is_school_admin' => (bool) $user->is_school_admin,
+        'tenant_id'       => $user->tenant_id,
+        'accountType'     => 'institution',
+
+        'school' => $user->school ? [
+            'id'     => $user->school->id,
+            'name'   => $user->school->name,
+            'status' => $user->school->status,
+        ] : null,
+    ];
+}
+
+
 }

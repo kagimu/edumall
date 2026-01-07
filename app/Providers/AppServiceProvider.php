@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Schema::defaultStringLength(191);
 
+        \Validator::extend('exists_tenant', function ($attribute, $value, $parameters, $validator) {
+            $model = $parameters[0]; // e.g., Category::class
+            return $model::where('tenant_id', tenant('id'))->where('id', $value)->exists();
+        });
+
 
 
 

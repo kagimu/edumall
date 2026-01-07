@@ -34,6 +34,9 @@ return [
     |
     */
 
+    'connection' => env('SANCTUM_CONNECTION', 'central'),
+
+
     'guard' => ['web'],
 
     /*

@@ -183,11 +183,12 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Laravel\Sanctum\SanctumServiceProvider::class,
-        
+
 
         /*
          * Package Service Providers...
          */
+        Stancl\Tenancy\TenancyServiceProvider::class,
         //Stevebauman\Location\LocationServiceProvider::class,
 
         /*
@@ -214,5 +215,6 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Location' => 'Stevebauman\Location\Facades\Location',
+        'Tenancy' => 'Stancl\Tenancy\Facades\Tenancy',
     ])->toArray(),
 ];

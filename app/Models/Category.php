@@ -3,8 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 
 class Category extends Model
 {
-    protected $fillable = ['name'];
+    use BelongsToTenant;
+
+    protected $fillable = ['tenant_id', 'name'];
 }

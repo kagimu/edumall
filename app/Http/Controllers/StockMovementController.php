@@ -54,7 +54,6 @@ class StockMovementController extends Controller
             'type' => $data['type'],
             'quantity' => $data['quantity'],
             'note' => $data['note'] ?? null,
-            'school_id' => session('tenant_school_id'),
         ]);
 
         // Update item quantity

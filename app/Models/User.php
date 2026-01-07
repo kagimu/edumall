@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Stancl\Tenancy\Database\Concerns\BelongsToTenant;
 use App\Models\Cart;
 
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory,HasApiTokens, Notifiable;
+    use HasFactory, HasApiTokens, Notifiable, BelongsToTenant;
 
     /**
      * The attributes that are mass assignable.
@@ -25,23 +26,18 @@ class User extends Authenticatable
     'lastName',
     'email',
     'password',
-    'accountType',
     'phone',
+    'role_id',
+     'is_school_admin',
+      'tenant_id',
+    'accountType',
+    'userType',
+    'customUserType',
+    'customDesignation',
     'bankAccount',
     'mobileMoneyNumber',
     'paymentMethods',
-    'userType',
-    'customUserType',
-    'institution_name',
-    'centre_number',
-    'district',
-    'adminName',
-    'customDesignation',
-    'adminEmail',
-    'adminPhone',
-    'role_id',
-    'school_id',
-    'is_school_admin',
+
   ];
 
 
@@ -80,8 +76,11 @@ class User extends Authenticatable
             return $this->hasMany(StockMovement::class);
         }
 
-        public function school() {
-            return $this->belongsTo(School::class);
+        public function school()
+        {
+            return $this->belongsTo(School::class, 'tenant_id');
         }
+
+
 
 }

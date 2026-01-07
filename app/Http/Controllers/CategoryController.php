@@ -14,11 +14,11 @@ class CategoryController extends Controller
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
+        if (!$user->tenant_id) {
+            return response()->json(['error' => 'User does not have an associated tenant'], 400);
         }
 
-        $categories = Category::where('school_id', $user->school_id)->get();
+        $categories = Category::where('tenant_id', $user->tenant_id)->get();
         return response()->json($categories);
     }
 
@@ -29,16 +29,16 @@ class CategoryController extends Controller
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 
-        if (!$user->school_id) {
-            return response()->json(['error' => 'User does not have an associated school'], 400);
+        if (!$user->tenant_id) {
+            return response()->json(['error' => 'User does not have an associated tenant'], 400);
         }
 
         $request->validate([
-            'name' => 'required|string|unique:categories,name,NULL,id,school_id,' . $user->school_id,
+            'name' => 'required|string|unique:categories,name,NULL,id,tenant_id,' . $user->tenant_id,
         ]);
 
         $category = Category::create([
-            'school_id' => $user->school_id,
+            'tenant_id' => $user->tenant_id,
             'name' => $request->name,
         ]);
 
@@ -63,7 +63,7 @@ class CategoryController extends Controller
         }
 
         $request->validate([
-            'name' => 'required|string|unique:categories,name,' . $category->id . ',id,school_id,' . $user->school_id,
+            'name' => 'required|string|unique:categories,name,' . $category->id . ',id,tenant_id,' . $user->tenant_id,
         ]);
 
         $category->update($request->only(['name']));
@@ -73,7 +73,7 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $user = request()->user();
-        if ($user->role_id !== 1 || $category->school_id !== $user->school_id) {
+        if ($user->role_id !== 1 || $category->tenant_id !== $user->tenant_id) {
             return response()->json(['error' => 'Unauthorized. Only school administrators can manage categories.'], 403);
         }
 

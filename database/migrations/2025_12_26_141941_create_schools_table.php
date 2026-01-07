@@ -12,13 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('schools', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('centre_number')->unique();
-            $table->string('district')->nullable();
-            $table->string('admin_name')->nullable();
-            $table->string('admin_email')->nullable();
-            $table->string('admin_phone')->nullable();
+            $table->uuid('id')->primary();
+            $table->json('data');
             $table->timestamps();
         });
     }

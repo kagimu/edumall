@@ -63,9 +63,9 @@ class Handler extends ExceptionHandler
 
             // Default fallback for other exceptions
             return response()->json([
-                'message' => $exception->getMessage(),
-                'exception' => get_class($exception),
-            ], 500);
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ], 500);
         }
 
         // For web routes (non-API), fallback to parent
